@@ -9,17 +9,17 @@ from loguru import logger
 from transformers import HfArgumentParser
 from transformers import set_seed
 
-from conlearn.arguments import KidDatagArguments
-from conlearn.arguments import KidModelArguments
-from conlearn.arguments import KidTrainingArguments
-from conlearn.dataset.loader import KidDataset
-from conlearn.pipelines.trainers.kidtrainer import KidTrainer
-from conlearn.utils.io import load_file
-from conlearn.utils.utils import generate_benchmark_filenames
-from conlearn.utils.utils import load_tokenizer
-from conlearn.utils.utils import MODEL_CLASSES
-from conlearn.utils.utils import MODEL_PATH_MAP
-from conlearn.utils.utils import print_recall_table
+from retriever.arguments.data import KidDatagArguments
+from retriever.arguments.model import KidModelArguments
+from retriever.arguments.training import KidTrainingArguments
+from retriever.dataset.loader import KidDataset
+from retriever.pipelines.trainers.kidtrainer import KidTrainer
+from retriever.utils.io import load_file
+from retriever.utils.utils import generate_benchmark_filenames
+from retriever.utils.utils import load_tokenizer
+from retriever.utils.utils import MODEL_CLASSES
+from retriever.utils.utils import MODEL_PATH_MAP
+from retriever.utils.utils import print_recall_table
 
 
 def main(data_args, model_args, train_args):
@@ -90,13 +90,13 @@ def main(data_args, model_args, train_args):
         'train',
         'data.jsonl',
     )
-    # train_dataset = load_file(training_file_path)
-    # eval_file_path = os.path.join(data_args.data_dir, data_args.token_level, 'eval', 'data.jsonl')
-    # eval_dataset = load_file(eval_file_path)
-    # train_dataset = KidDataset(data_args, train_dataset, tokenizer)
-    # eval_dataset = KidDataset(data_args, eval_dataset, tokenizer)
-    train_dataset = None
-    eval_dataset = None
+    train_dataset = load_file(training_file_path)
+    eval_file_path = os.path.join(
+        data_args.data_dir, data_args.token_level, 'eval', 'data.jsonl',
+    )
+    eval_dataset = load_file(eval_file_path)
+    train_dataset = KidDataset(data_args, train_dataset, tokenizer)
+    eval_dataset = KidDataset(data_args, eval_dataset, tokenizer)
 
     trainer = KidTrainer(
         data_args=data_args,
@@ -115,8 +115,8 @@ def main(data_args, model_args, train_args):
     print_recall_table(results)
     exit()
 
-    # if train_args.do_train:
-    #     trainer.train()
+    if train_args.do_train:
+        trainer.train()
 
 
 if __name__ == '__main__':

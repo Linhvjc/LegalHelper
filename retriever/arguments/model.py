@@ -5,7 +5,7 @@ from dataclasses import field
 
 import torch
 
-from conlearn.utils.utils import MODEL_CLASSES
+from retriever.utils.utils import MODEL_CLASSES
 
 
 @dataclass

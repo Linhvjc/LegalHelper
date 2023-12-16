@@ -8,7 +8,7 @@ from transformers.models.roberta.modeling_roberta import RobertaLMHead
 from transformers.models.roberta.modeling_roberta import RobertaModel
 
 from .modules import SimilarityFunctionWithTorch
-from conlearn.schemas.outputs import KidSparseOutput
+from retriever.schemas.outputs import KidSparseOutput
 
 
 class ConLearnSparseRoberta(RobertaForMaskedLM):

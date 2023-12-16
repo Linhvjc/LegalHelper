@@ -5,8 +5,8 @@ from torch.nn import Module
 from transformers import PreTrainedTokenizer
 
 from .base import ModelEncoder
-from conlearn.dataset.featuring import convert_text_to_features
-from conlearn.dataset.featuring import convert_text_to_features_long_context
+from retriever.dataset.featuring import convert_text_to_features
+from retriever.dataset.featuring import convert_text_to_features_long_context
 
 
 class KidEncoder(ModelEncoder):

@@ -8,7 +8,7 @@ from transformers.models.roberta.modeling_roberta import RobertaPreTrainedModel
 
 from .modules import Pooler
 from .modules import SimilarityFunctionWithTorch
-from conlearn.schemas.outputs import KidDenseOutput
+from retriever.schemas.outputs import KidDenseOutput
 
 
 class KidDenseRoberta(RobertaPreTrainedModel):

@@ -10,17 +10,17 @@ from tqdm import tqdm
 from transformers import HfArgumentParser
 from transformers.tokenization_utils_base import PreTrainedTokenizerBase
 
-from conlearn.arguments import KidDatagArguments
-from conlearn.arguments import KidModelArguments
-from conlearn.arguments import KidTrainingArguments
-from conlearn.encode.kid import KidEncoder
-from conlearn.utils.io import load_file
-from conlearn.utils.metric import recall
-from conlearn.utils.utils import generate_benchmark_filenames
-from conlearn.utils.utils import load_tokenizer
-from conlearn.utils.utils import MODEL_CLASSES
-from conlearn.utils.utils import MODEL_PATH_MAP
-from conlearn.utils.utils import print_recall_table
+from retriever.arguments import KidDatagArguments
+from retriever.arguments import KidModelArguments
+from retriever.arguments import KidTrainingArguments
+from retriever.encode.kid import KidEncoder
+from retriever.utils.io import load_file
+from retriever.utils.metric import recall
+from retriever.utils.utils import generate_benchmark_filenames
+from retriever.utils.utils import load_tokenizer
+from retriever.utils.utils import MODEL_CLASSES
+from retriever.utils.utils import MODEL_PATH_MAP
+from retriever.utils.utils import print_recall_table
 
 
 class Chunking:

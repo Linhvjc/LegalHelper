@@ -19,11 +19,11 @@ from transformers.tokenization_utils_base import PreTrainedTokenizerBase
 from transformers.trainer_pt_utils import get_parameter_names
 
 from .base import Trainer
-from conlearn.encode.kid import KidEncoder
-from conlearn.utils.io import load_file
-from conlearn.utils.metric import recall
-from conlearn.utils.regularize import EarlyStopping
-from conlearn.utils.utils import log_embeddings_to_wandb
+from retriever.encode.kid import KidEncoder
+from retriever.utils.io import load_file
+from retriever.utils.metric import recall
+from retriever.utils.regularize import EarlyStopping
+from retriever.utils.utils import log_embeddings_to_wandb
 
 
 class KidTrainer(Trainer):

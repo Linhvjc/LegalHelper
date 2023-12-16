@@ -19,8 +19,8 @@ from transformers import AutoTokenizer
 from transformers import RobertaConfig
 from transformers import set_seed
 
-from conlearn.arguments.data import RankSimCSEDatagArguments
-from conlearn.models.kiddense import KidDenseRoberta
+from retriever.arguments.data import RankSimCSEDatagArguments
+from retriever.models.kiddense import KidDenseRoberta
 
 
 MODEL_CLASSES = {

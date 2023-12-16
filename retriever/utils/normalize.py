@@ -4,9 +4,9 @@ from typing import Text
 
 import regex as re
 
-from conlearn.utils.utils import is_valid_vietnam_word
-from conlearn.utils.utils import vowel
-from conlearn.utils.utils import vowel_to_idx
+from retriever.utils.utils import is_valid_vietnam_word
+from retriever.utils.utils import vowel
+from retriever.utils.utils import vowel_to_idx
 
 
 def normalize_encode(text: str) -> str:

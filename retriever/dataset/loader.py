@@ -8,7 +8,7 @@ import torch
 from torch.utils.data import Dataset
 from transformers import PreTrainedTokenizer
 
-from conlearn.dataset.featuring import convert_text_to_features
+from retriever.dataset.featuring import convert_text_to_features
 
 
 class AbstractDataset(ABC, Dataset):

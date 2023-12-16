@@ -5,9 +5,9 @@ from typing import Any
 
 from transformers import PreTrainedTokenizer
 
-from conlearn.utils.normalize import normalize_encode
-from conlearn.utils.normalize import normalize_word_diacritic
-from conlearn.utils.normalize import remove_punctuation
+from retriever.utils.normalize import normalize_encode
+from retriever.utils.normalize import normalize_word_diacritic
+from retriever.utils.normalize import remove_punctuation
 
 
 def convert_text_to_features(
