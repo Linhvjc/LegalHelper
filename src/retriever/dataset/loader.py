@@ -5,9 +5,10 @@ from abc import abstractmethod
 from pathlib import Path
 
 import torch
-from retriever.dataset.featuring import convert_text_to_features
 from torch.utils.data import Dataset
 from transformers import PreTrainedTokenizer
+
+from src.retriever.dataset.featuring import convert_text_to_features
 
 
 class AbstractDataset(ABC, Dataset):

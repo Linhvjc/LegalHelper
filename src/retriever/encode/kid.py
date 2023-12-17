@@ -1,12 +1,12 @@
 from __future__ import annotations
 
 import torch
-from retriever.dataset.featuring import convert_text_to_features
-from retriever.dataset.featuring import convert_text_to_features_long_context
 from torch.nn import Module
 from transformers import PreTrainedTokenizer
 
 from .base import ModelEncoder
+from src.retriever.dataset.featuring import convert_text_to_features
+from src.retriever.dataset.featuring import convert_text_to_features_long_context
 
 
 class KidEncoder(ModelEncoder):

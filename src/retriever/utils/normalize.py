@@ -3,9 +3,10 @@ from __future__ import annotations
 from typing import Text
 
 import regex as re
-from retriever.utils.utils import is_valid_vietnam_word
-from retriever.utils.utils import vowel
-from retriever.utils.utils import vowel_to_idx
+
+from src.retriever.utils.utils import is_valid_vietnam_word
+from src.retriever.utils.utils import vowel
+from src.retriever.utils.utils import vowel_to_idx
 
 
 def normalize_encode(text: str) -> str:

@@ -7,11 +7,6 @@ import numpy as np
 import torch
 import wandb
 from loguru import logger
-from retriever.encode.kid import KidEncoder
-from retriever.utils.io import load_file
-from retriever.utils.metric import recall
-from retriever.utils.regularize import EarlyStopping
-from retriever.utils.utils import log_embeddings_to_wandb
 from torch.utils.data.dataloader import DataLoader
 from torch.utils.data.dataset import Dataset
 from torch.utils.data.sampler import RandomSampler
@@ -24,6 +19,11 @@ from transformers.tokenization_utils_base import PreTrainedTokenizerBase
 from transformers.trainer_pt_utils import get_parameter_names
 
 from .base import Trainer
+from src.retriever.encode.kid import KidEncoder
+from src.retriever.utils.io import load_file
+from src.retriever.utils.metric import recall
+from src.retriever.utils.regularize import EarlyStopping
+from src.retriever.utils.utils import log_embeddings_to_wandb
 
 
 class KidTrainer(Trainer):

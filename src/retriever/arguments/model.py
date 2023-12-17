@@ -4,7 +4,8 @@ from dataclasses import dataclass
 from dataclasses import field
 
 import torch
-from retriever.utils.utils import MODEL_CLASSES
+
+from src.retriever.utils.utils import MODEL_CLASSES
 
 
 @dataclass

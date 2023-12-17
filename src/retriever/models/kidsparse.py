@@ -2,13 +2,13 @@ from __future__ import annotations
 
 import torch
 import torch.nn as nn
-from retriever.schemas.outputs import KidSparseOutput
 from transformers import PretrainedConfig
 from transformers.models.roberta.modeling_roberta import RobertaForMaskedLM
 from transformers.models.roberta.modeling_roberta import RobertaLMHead
 from transformers.models.roberta.modeling_roberta import RobertaModel
 
 from .modules import SimilarityFunctionWithTorch
+from src.retriever.schemas.outputs import KidSparseOutput
 
 
 class ConLearnSparseRoberta(RobertaForMaskedLM):

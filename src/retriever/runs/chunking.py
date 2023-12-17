@@ -6,20 +6,21 @@ from statistics import mean
 import numpy as np
 import torch
 from loguru import logger
-from retriever.arguments import KidDatagArguments
-from retriever.arguments import KidModelArguments
-from retriever.arguments import KidTrainingArguments
-from retriever.encode.kid import KidEncoder
-from retriever.utils.io import load_file
-from retriever.utils.metric import recall
-from retriever.utils.utils import generate_benchmark_filenames
-from retriever.utils.utils import load_tokenizer
-from retriever.utils.utils import MODEL_CLASSES
-from retriever.utils.utils import MODEL_PATH_MAP
-from retriever.utils.utils import print_recall_table
 from tqdm import tqdm
 from transformers import HfArgumentParser
 from transformers.tokenization_utils_base import PreTrainedTokenizerBase
+
+from src.retriever.arguments import KidDatagArguments
+from src.retriever.arguments import KidModelArguments
+from src.retriever.arguments import KidTrainingArguments
+from src.retriever.encode.kid import KidEncoder
+from src.retriever.utils.io import load_file
+from src.retriever.utils.metric import recall
+from src.retriever.utils.utils import generate_benchmark_filenames
+from src.retriever.utils.utils import load_tokenizer
+from src.retriever.utils.utils import MODEL_CLASSES
+from src.retriever.utils.utils import MODEL_PATH_MAP
+from src.retriever.utils.utils import print_recall_table
 
 
 class Chunking:

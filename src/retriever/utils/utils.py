@@ -14,11 +14,12 @@ from datasets import DatasetDict
 from datasets import load_dataset
 from prettytable import PrettyTable
 from pyvi import ViTokenizer
-from retriever.models.kiddense import KidDenseRoberta
 from tabulate import tabulate
 from transformers import AutoTokenizer
 from transformers import RobertaConfig
 from transformers import set_seed
+
+from src.retriever.models.kiddense import KidDenseRoberta
 
 
 MODEL_CLASSES = {

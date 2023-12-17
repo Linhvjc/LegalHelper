@@ -2,13 +2,13 @@ from __future__ import annotations
 
 import torch
 import torch.nn as nn
-from retriever.schemas.outputs import KidDenseOutput
 from transformers import PretrainedConfig
 from transformers.models.roberta.modeling_roberta import RobertaModel
 from transformers.models.roberta.modeling_roberta import RobertaPreTrainedModel
 
 from .modules import Pooler
 from .modules import SimilarityFunctionWithTorch
+from src.retriever.schemas.outputs import KidDenseOutput
 
 
 class KidDenseRoberta(RobertaPreTrainedModel):

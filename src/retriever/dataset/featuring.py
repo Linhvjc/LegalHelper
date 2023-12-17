@@ -3,10 +3,11 @@ from __future__ import annotations
 import math
 from typing import Any
 
-from retriever.utils.normalize import normalize_encode
-from retriever.utils.normalize import normalize_word_diacritic
-from retriever.utils.normalize import remove_punctuation
 from transformers import PreTrainedTokenizer
+
+from src.retriever.utils.normalize import normalize_encode
+from src.retriever.utils.normalize import normalize_word_diacritic
+from src.retriever.utils.normalize import remove_punctuation
 
 
 def convert_text_to_features(

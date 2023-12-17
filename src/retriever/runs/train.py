@@ -6,19 +6,20 @@ import os
 import torch
 import wandb
 from loguru import logger
-from retriever.arguments.data import KidDatagArguments
-from retriever.arguments.model import KidModelArguments
-from retriever.arguments.training import KidTrainingArguments
-from retriever.dataset.loader import KidDataset
-from retriever.pipelines.trainers.kidtrainer import KidTrainer
-from retriever.utils.io import load_file
-from retriever.utils.utils import generate_benchmark_filenames
-from retriever.utils.utils import load_tokenizer
-from retriever.utils.utils import MODEL_CLASSES
-from retriever.utils.utils import MODEL_PATH_MAP
-from retriever.utils.utils import print_recall_table
 from transformers import HfArgumentParser
 from transformers import set_seed
+
+from src.retriever.arguments.data import KidDatagArguments
+from src.retriever.arguments.model import KidModelArguments
+from src.retriever.arguments.training import KidTrainingArguments
+from src.retriever.dataset.loader import KidDataset
+from src.retriever.pipelines.trainers.kidtrainer import KidTrainer
+from src.retriever.utils.io import load_file
+from src.retriever.utils.utils import generate_benchmark_filenames
+from src.retriever.utils.utils import load_tokenizer
+from src.retriever.utils.utils import MODEL_CLASSES
+from src.retriever.utils.utils import MODEL_PATH_MAP
+from src.retriever.utils.utils import print_recall_table
 
 
 def main(data_args, model_args, train_args):
