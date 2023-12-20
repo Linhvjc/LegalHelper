@@ -53,8 +53,7 @@ class Retriever:
             embedding_query.detach().numpy() @
             self.embedding_corpus.T
         ).squeeze(0)
-        logger.info('Normalize scores')
-        scores_normalize = []
+        scores_document = []
         cursor = 0
         for size in self.count_chunk:
             item = scores[cursor:cursor + size]
@@ -65,18 +64,18 @@ class Retriever:
             real_score = sum(
                 [score * (j + 1 * 2) for j, score in enumerate(max_score)],
             ) / sum([(k + 1 * 2) for k in range(len(max_score))])
-            scores_normalize.append(real_score)
+            scores_document.append(real_score)
 
         index_best_doc, _ = max(
-            enumerate(scores_normalize), key=lambda x: x[1],
+            enumerate(scores_document), key=lambda x: x[1],
         )
+
+        if scores_document[index_best_doc] < 50:
+            return 'Xin lỗi, tôi cần thêm thông tin để trả lời câu hỏi của bạn. Bạn có thể cung cấp thêm thông tin chi tiết về vấn đề mà bạn quan tâm không?'
+
         position_begin_best_doc = sum(self.count_chunk[:index_best_doc])
         position_end_best_doc = position_begin_best_doc + \
             self.count_chunk[index_best_doc]
-
-        # best_chunks_score = scores[position_begin_best_doc:position_end_best_doc]
-        # index_best_chunk, _ = max(enumerate(best_chunks_score), key=lambda x: x[1])
-        # result = self.items_corpus[position_begin_best_doc + index_best_chunk]
 
         best_document = self.items_corpus[position_begin_best_doc:position_end_best_doc]
         result = ''
@@ -86,7 +85,7 @@ class Retriever:
         return result
 
 
-if __name__ == '__main__':
+def main_retrieval():
     model_path = '/home/link/spaces/LinhCSE/models/retriever'
     corpus_path = '/home/link/spaces/LinhCSE/data/full/corpus.json'
     embedding_path = '/home/link/spaces/LinhCSE/data/full/embeddings_corpus.npy'
@@ -99,3 +98,7 @@ if __name__ == '__main__':
         print('Retrieval: ')
         response = retriever.retrieval(input_text)
         print(response)
+
+
+if __name__ == '__main__':
+    main_retrieval()
