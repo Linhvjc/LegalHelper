@@ -5,9 +5,9 @@ import json
 import numpy as np
 import torch
 from loguru import logger
-from tqdm import tqdm
 from transformers import AutoModel
 from transformers import AutoTokenizer
+# from tqdm import tqdm
 
 
 class Retriever:
@@ -22,10 +22,10 @@ class Retriever:
     def _read_corpus(self, corpus_path):
         logger.info('Load corpus...')
         with open(corpus_path) as f:
-            corpus = json.load(f)
+            self.corpus = json.load(f)
 
         count_chunk, items_corpus = [], []
-        for document in corpus:
+        for document in self.corpus:
             count_chunk.append(len(document['sections']))
             items_corpus.extend(document['sections'])
 
@@ -78,7 +78,7 @@ class Retriever:
             self.count_chunk[index_best_doc]
 
         best_document = self.items_corpus[position_begin_best_doc:position_end_best_doc]
-        result = ''
+        result = f"Thông tư số {self.corpus[index_best_doc]['document_id']}. "
         for chunk in best_document:
             result += f"{chunk['content']}. "
 
