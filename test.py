@@ -7,8 +7,6 @@ from src.llms.llm import get_response
 from src.prompt.prompt import get_prompt
 from src.retriever.main import Retriever
 
-app = FastAPI()
-
 model_path = '/home/link/spaces/LinhCSE/models/retriever'
 corpus_path = '/home/link/spaces/LinhCSE/data/full/corpus.json'
 embedding_path = '/home/link/spaces/LinhCSE/data/full/embeddings_corpus.npy'
@@ -24,16 +22,22 @@ def e2e_response(text: str):
     return response
 
 
-class Query(BaseModel):
-    text: str
+# class Query(BaseModel):
+#     text: str
 
 
-@app.get('/')
-async def root():
-    return {'message': 'Hello World'}
+# @app.get('/')
+# async def root():
+#     return {'message': 'Hello World'}
 
 
-@app.post('/get_response')
-def create_item(item: Query):
-    return e2e_response(item.text)
-    # return "hello"
+# @app.post('/get_response')
+# async def create_item(item: Query):
+#     return e2e_response(item.text)
+#     # return "hello"
+
+if __name__ == '__main__':
+    while True:
+        text = input('You: ')
+        response = e2e_response(text=text)
+        print('Response: ', response)

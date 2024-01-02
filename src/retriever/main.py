@@ -102,8 +102,8 @@ class Retriever:
         )
 
         #! Threshold
-        if scores_document[index_best_doc] < 50:
-            return 'Xin lỗi, tôi cần thêm thông tin để trả lời câu hỏi của bạn. Bạn có thể cung cấp thêm thông tin chi tiết về vấn đề mà bạn quan tâm không?'
+        # if scores_document[index_best_doc] < 50:
+        #     return 'Xin lỗi, tôi cần thêm thông tin để trả lời câu hỏi của bạn. Bạn có thể cung cấp thêm thông tin chi tiết về vấn đề mà bạn quan tâm không?'
 
         #! Get all chunk in best document
         position_begin_best_doc = sum(self.count_chunk[:index_best_doc])
