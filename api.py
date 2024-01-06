@@ -20,7 +20,7 @@ retriever = Retriever(
 def e2e_response(text: str):
     document = retriever.retrieval(text)
     prompt = get_prompt(query=text, document=document)
-    response = get_response(prompt)
+    response = get_response(prompt, model_name='gpt35')
     return response
 
 

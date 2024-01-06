@@ -9,7 +9,6 @@ from pyvi import ViTokenizer
 from rank_bm25 import BM25Okapi
 from transformers import AutoModel
 from transformers import AutoTokenizer
-# from tqdm import tqdm
 
 
 class Retriever:
