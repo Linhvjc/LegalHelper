@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import json
+import os
 
 import numpy as np
 import torch
@@ -12,55 +13,70 @@ from transformers import AutoTokenizer
 
 
 class Retriever:
-    def __init__(self, model_path, corpus_path, embedding_path) -> None:
-        self.device = torch.device('cpu')
-        self.tokenizer = AutoTokenizer.from_pretrained('vinai/phobert-base-v2')
+    def __init__(self, model_path, database_path) -> None:
+        self.device = torch.device(
+            'cuda' if torch.cuda.is_available() else 'cpu',
+        )
+        self.tokenizer = AutoTokenizer.from_pretrained(model_path)
         self.model = AutoModel.from_pretrained(model_path)
-        self.embedding_corpus = np.load(embedding_path)
-        self.count_chunk, self.items_corpus = self._read_corpus(corpus_path)
         self.model = self.model.to(self.device)
 
-    def _read_corpus(self, corpus_path):
-        logger.info('Load corpus...')
-        with open(corpus_path) as f:
+        self.embedding_corpus_full = np.load(
+            os.path.join(database_path, 'corpus.npy'),
+        )
+        self.embedding_article = np.load(
+            os.path.join(database_path, 'articles.npy'),
+        )
+        self.count_chunk_docs = np.load(
+            os.path.join(database_path, 'counting.npy'),
+        )
+        with open(os.path.join(database_path, 'corpus.json')) as f:
             self.corpus = json.load(f)
-
-        count_chunk, items_corpus = [], []
-        for document in self.corpus:
-            count_chunk.append(len(document['sections']))
-            items_corpus.extend(document['sections'])
-
-        return count_chunk, items_corpus
+        self.num_article_doc = [len(item['sections']) for item in self.corpus]
 
     def _search_by_bm25(self, query: str, items: list) -> str:
-        corpus_splitted, corpus_original = [], []
-        for item in items:
-            corpus_original.append(item['content'])
-            text = ViTokenizer.tokenize(item['content'])
+        corpus_splitted, corpus_original = [], {}
+        for i, item in enumerate(items):
+            text = item['title'] + '. ' + item['content']
+            corpus_original[text] = i
+            text = ViTokenizer.tokenize(text)
             corpus_splitted.append(text.lower().split())
         bm25 = BM25Okapi(corpus_splitted)
 
         query = query.lower().split()
 
-        return bm25.get_top_n(query, corpus_original, n=1)[0] + '\n'
+        top_result = bm25.get_top_n(
+            query, list(corpus_original.keys()), n=1,
+        )[0]
+        top_result_index = corpus_original[top_result]
 
-    def _search_by_model(self, scores, begin_idx, end_idx):
-        best_chunks_score = scores[begin_idx:end_idx]
-        index_best_chunk, _ = max(
-            enumerate(best_chunks_score), key=lambda x: x[1],
-        )
-        result = self.items_corpus[begin_idx + index_best_chunk]['content']
-        return result + '\n'
+        return top_result_index, top_result
+
+    def _search_by_model(self, best_document, best_articles_embedding, embedding_query):
+        scores = (
+            embedding_query.cpu().detach().numpy() @
+            best_articles_embedding.T
+        ).squeeze(0)
+
+        two_best_doc = sorted(
+            range(len(scores)),
+            key=lambda i: scores[i], reverse=True,
+        )[:2]
+        top1_chunk = best_document['sections'][two_best_doc[0]]
+        top2_chunk = best_document['sections'][two_best_doc[1]]
+        result_top1 = top1_chunk['title'] + '. ' + top1_chunk['content']
+        result_top2 = top2_chunk['title'] + '. ' + top2_chunk['content']
+        return two_best_doc[0], result_top1, result_top2
 
     def _caculate_score(self, embedding_query):
         scores_chunk = (
-            embedding_query.detach().numpy() @
-            self.embedding_corpus.T
+            embedding_query.cpu().detach().numpy() @
+            self.embedding_corpus_full.T
         ).squeeze(0)
 
         scores_document = []
         cursor = 0
-        for size in self.count_chunk:
+        for size in self.count_chunk_docs:
             item = scores_chunk[cursor:cursor + size]
             item = sorted(item, reverse=True)
             cursor += size
@@ -100,38 +116,42 @@ class Retriever:
             enumerate(scores_document), key=lambda x: x[1],
         )
 
-        #! Threshold
-        # if scores_document[index_best_doc] < 50:
-        #     return 'Xin lỗi, tôi cần thêm thông tin để trả lời câu hỏi của bạn. Bạn có thể cung cấp thêm thông tin chi tiết về vấn đề mà bạn quan tâm không?'
-
         #! Get all chunk in best document
-        position_begin_best_doc = sum(self.count_chunk[:index_best_doc])
+        position_begin_best_doc = sum(self.num_article_doc[:index_best_doc])
         position_end_best_doc = position_begin_best_doc + \
-            self.count_chunk[index_best_doc]
-        best_document = self.items_corpus[position_begin_best_doc:position_end_best_doc]
+            self.num_article_doc[index_best_doc]
+        # best_document = self.corpus[position_begin_best_doc:position_end_best_doc]
+        best_articles_embedding = self.embedding_article[position_begin_best_doc:position_end_best_doc]
 
         #! Get the title of the document
         result_title = f"Thông tư số {self.corpus[index_best_doc]['document_id']}"
 
         #! Get result by model
-        result_model = self._search_by_model(
-            scores=scores_chunk,
-            begin_idx=position_begin_best_doc,
-            end_idx=position_end_best_doc,
+        id_result_model, result_model_top1, result_model_top2 = self._search_by_model(
+            best_document=self.corpus[index_best_doc],
+            best_articles_embedding=best_articles_embedding,
+            embedding_query=embedding_query,
         )
 
         #! Get result by bm25
-        result_bm25 = self._search_by_bm25(query=text, items=best_document)
+        id_result_bm25, result_bm25 = self._search_by_bm25(
+            query=text, items=self.corpus[index_best_doc]['sections'],
+        )
 
-        return f"""{result_title}\nModel: {result_model}\nBm25: {result_bm25}"""
+        if id_result_model != id_result_bm25:
+            final_result = f"""{result_title}\nDocument 1: {result_model_top1}\nDocument 2: {result_bm25}"""
+        else:
+            final_result = f"""{result_title}\nDocument 1: {result_model_top2}\nDocument 2: {result_bm25}"""
+
+        return final_result
 
 
 def main_retrieval():
     model_path = '/home/link/spaces/LinhCSE/models/retriever'
-    corpus_path = '/home/link/spaces/LinhCSE/data/full/corpus.json'
-    embedding_path = '/home/link/spaces/LinhCSE/data/full/embeddings_corpus.npy'
+    database_path = '/home/link/spaces/LinhCSE/data/concat'
     retriever = Retriever(
-        model_path=model_path, corpus_path=corpus_path, embedding_path=embedding_path,
+        model_path=model_path,
+        database_path=database_path,
     )
 
     while (True):
