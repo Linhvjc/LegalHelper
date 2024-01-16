@@ -34,39 +34,90 @@ class Retriever:
             self.corpus = json.load(f)
         self.num_article_doc = [len(item['sections']) for item in self.corpus]
 
-    def _search_by_bm25(self, query: str, items: list) -> str:
-        corpus_splitted, corpus_original = [], {}
-        for i, item in enumerate(items):
-            text = item['title'] + '. ' + item['content']
-            corpus_original[text] = i
-            text = ViTokenizer.tokenize(text)
-            corpus_splitted.append(text.lower().split())
-        bm25 = BM25Okapi(corpus_splitted)
+    def _search_by_bm25(self, query: str, top_best_document) -> str:
+        articles_texts = []
+        articles_id = []
+        texts_splitted = []
+        for doc in top_best_document:
+            articles_texts.extend(
+                [f"Thông tư {doc['document_id']}. {article['content']}" for article in doc['sections']],
+            )
+            articles_id.extend([
+                article['section_id']
+                for article in doc['sections']
+            ])
 
+            texts_splitted.extend([
+                ViTokenizer.tokenize(article['content']) for article in doc['sections']
+            ])
+        articles_mapping = {
+            key: value for key,
+            value in zip(articles_texts, articles_id)
+        }
+
+        bm25 = BM25Okapi(texts_splitted)
         query = query.lower().split()
 
-        top_result = bm25.get_top_n(
-            query, list(corpus_original.keys()), n=1,
-        )[0]
-        top_result_index = corpus_original[top_result]
+        tops_chunk = bm25.get_top_n(
+            query, list(articles_mapping.keys()), n=5,
+        )
+        tops_idx = [articles_mapping[chunk] for chunk in tops_chunk]
+        return tops_chunk, tops_idx
+        # bm25 = BM25Okapi(corpus_splitted)
+        # query = query.lower().split()
 
-        return top_result_index, top_result
+        # corpus_splitted, corpus_original = [], {}
+        # for i, item in enumerate(items):
+        #     text = item['title'] + '. ' + item['content']
+        #     corpus_original[text] = i
+        #     text = ViTokenizer.tokenize(text)
+        #     corpus_splitted.append(text.lower().split())
+        # bm25 = BM25Okapi(corpus_splitted)
 
-    def _search_by_model(self, best_document, best_articles_embedding, embedding_query):
+        # query = query.lower().split()
+
+        # top_result = bm25.get_top_n(
+        #     query, list(corpus_original.keys()), n=1,
+        # )[0]
+        # top_result_index = corpus_original[top_result]
+
+        # return top_result_index, top_result
+
+    def _search_by_model(self, top_best_document, top_5_best_doc_idx, embedding_query):
+        articles_texts = []
+        articles_id = []
+        for doc in top_best_document:
+            articles_texts.extend(
+                [f"Thông tư {doc['document_id']}. {article['content']}" for article in doc['sections']],
+            )
+            articles_id.extend([
+                article['section_id']
+                for article in doc['sections']
+            ])
+
+        articles_embedding = []
+        for idx in top_5_best_doc_idx:
+            begin_idx = sum(self.num_article_doc[:idx])
+            end_idx = begin_idx + \
+                self.num_article_doc[idx]
+            # best_document = self.corpus[begin_idx:end_idx]
+            embedding = self.embedding_article[begin_idx:end_idx]
+            articles_embedding.append(embedding)
+        articles_embedding = np.concatenate(articles_embedding)
+
         scores = (
             embedding_query.cpu().detach().numpy() @
-            best_articles_embedding.T
+            articles_embedding.T
         ).squeeze(0)
 
-        two_best_doc = sorted(
+        top5_best_doc = sorted(
             range(len(scores)),
             key=lambda i: scores[i], reverse=True,
-        )[:2]
-        top1_chunk = best_document['sections'][two_best_doc[0]]
-        top2_chunk = best_document['sections'][two_best_doc[1]]
-        result_top1 = top1_chunk['title'] + '. ' + top1_chunk['content']
-        result_top2 = top2_chunk['title'] + '. ' + top2_chunk['content']
-        return two_best_doc[0], result_top1, result_top2
+        )[:5]
+
+        tops_chunk = [articles_texts[idx] for idx in top5_best_doc]
+        tops_idx = [articles_id[idx] for idx in top5_best_doc]
+        return tops_chunk, tops_idx
 
     def _caculate_score(self, embedding_query):
         scores_chunk = (
@@ -112,38 +163,47 @@ class Retriever:
             embedding_query=embedding_query,
         )
 
-        index_best_doc, _ = max(
-            enumerate(scores_document), key=lambda x: x[1],
-        )
+        # index_best_doc, _ = max(
+        #     enumerate(scores_document), key=lambda x: x[1],
+        # )
+        top_5_best_doc_idx = sorted(
+            range(len(scores_document)),
+            key=lambda i: scores_document[i], reverse=True,
+        )[:5]
+        top_best_document = [self.corpus[idx] for idx in top_5_best_doc_idx]
 
         #! Get all chunk in best document
-        position_begin_best_doc = sum(self.num_article_doc[:index_best_doc])
-        position_end_best_doc = position_begin_best_doc + \
-            self.num_article_doc[index_best_doc]
+        # position_begin_best_doc = sum(self.num_article_doc[:index_best_doc])
+        # position_end_best_doc = position_begin_best_doc + \
+        #     self.num_article_doc[index_best_doc]
         # best_document = self.corpus[position_begin_best_doc:position_end_best_doc]
-        best_articles_embedding = self.embedding_article[position_begin_best_doc:position_end_best_doc]
+        # best_articles_embedding = self.embedding_article[position_begin_best_doc:position_end_best_doc]
 
         #! Get the title of the document
-        result_title = f"Thông tư số {self.corpus[index_best_doc]['document_id']}"
+        # result_title = f"Thông tư số {self.corpus[index_best_doc]['document_id']}"
 
         #! Get result by model
-        id_result_model, result_model_top1, result_model_top2 = self._search_by_model(
-            best_document=self.corpus[index_best_doc],
-            best_articles_embedding=best_articles_embedding,
+        tops_chunk_model, tops_idx_model = self._search_by_model(
+            top_best_document=top_best_document,
+            top_5_best_doc_idx=top_5_best_doc_idx,
             embedding_query=embedding_query,
         )
 
         #! Get result by bm25
-        id_result_bm25, result_bm25 = self._search_by_bm25(
-            query=text, items=self.corpus[index_best_doc]['sections'],
+        tops_chunk_bm25, tops_idx_bm25 = self._search_by_bm25(
+            query=text,
+            top_best_document=top_best_document,
         )
 
-        if id_result_model != id_result_bm25:
-            final_result = f"""{result_title}\nDocument 1: {result_model_top1}\nDocument 2: {result_bm25}"""
-        else:
-            final_result = f"""{result_title}\nDocument 1: {result_model_top2}\nDocument 2: {result_bm25}"""
+        print('Model: \n', tops_idx_model)
+        print('Bm25: \n', tops_idx_bm25)
 
-        return final_result
+        # if id_result_model != id_result_bm25:
+        #     final_result = f"""{result_title}\nDocument 1: {result_model_top1}\nDocument 2: {result_bm25}"""
+        # else:
+        #     final_result = f"""{result_title}\nDocument 1: {result_model_top2}\nDocument 2: {result_bm25}"""
+
+        # return final_result
 
 
 def main_retrieval():
