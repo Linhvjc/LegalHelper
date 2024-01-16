@@ -17,8 +17,8 @@ retriever = Retriever(
 
 
 def e2e_response(text: str):
-    document = retriever.retrieval(text)
-    print(document)
+    document = retriever.retrieval(text, max_length_output=4096)
+    # print(document)
     prompt = get_prompt(query=text, document=document)
     response = get_response(prompt, model_name='gpt35')
     return response

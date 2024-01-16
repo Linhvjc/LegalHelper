@@ -140,7 +140,7 @@ class Retriever:
 
         return scores_chunk, scores_document
 
-    def retrieval(self, text):
+    def retrieval(self, text, max_length_output):
         text = ViTokenizer.tokenize(text)
         features = self.tokenizer(
             text=text,
@@ -195,8 +195,38 @@ class Retriever:
             top_best_document=top_best_document,
         )
 
-        print('Model: \n', tops_idx_model)
-        print('Bm25: \n', tops_idx_bm25)
+        final_result = ''
+        idx_contain = []
+        max_length_output = max_length_output - 200
+        for i in range(len(tops_chunk_model)):
+
+            tops_chunk_model[i] = '' if tops_idx_model[i] in idx_contain else tops_chunk_model[i]
+            tops_chunk_bm25[i] = '' if tops_idx_bm25[i] in idx_contain else tops_chunk_bm25[i]
+
+            result_model_pyvi = ViTokenizer.tokenize(tops_chunk_model[i])
+            result_bm25_pyvi = ViTokenizer.tokenize(tops_chunk_bm25[i])
+            final_result_pyvi = ViTokenizer.tokenize(final_result)
+
+            len_model_tokens = len(self.tokenizer.tokenize(result_model_pyvi))
+            len_bm25_tokens = len(self.tokenizer.tokenize(result_bm25_pyvi))
+            len_current_tokens = len(
+                self.tokenizer.tokenize(final_result_pyvi),
+            )
+
+            if (len_current_tokens + len_model_tokens + len_bm25_tokens) < max_length_output:
+                if len_model_tokens > 0:
+                    final_result += tops_chunk_model[i] + '. '
+                if len_bm25_tokens > 0:
+                    final_result += tops_chunk_bm25[i] + '. '
+            elif (len_current_tokens + len_model_tokens) < max_length_output:
+                if len_model_tokens > 0:
+                    final_result += tops_chunk_model[i] + '. '
+            else:
+                lack_token_len = max_length_output - len_current_tokens
+                result_model = ' '.join(result_model_pyvi[:lack_token_len])
+                final_result += result_model
+                break
+        return final_result
 
         # if id_result_model != id_result_bm25:
         #     final_result = f"""{result_title}\nDocument 1: {result_model_top1}\nDocument 2: {result_bm25}"""
@@ -217,7 +247,7 @@ def main_retrieval():
     while (True):
         input_text = input('Query: ')
         print('Retrieval: ')
-        response = retriever.retrieval(input_text)
+        response = retriever.retrieval(input_text, max_length_output=4096)
         print(response)
 
 
