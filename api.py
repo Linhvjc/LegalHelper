@@ -24,6 +24,17 @@ def e2e_response(text: str):
     return response
 
 
+def retrieval_response(text: str):
+    document = retriever.retrieval(text, max_length_output=4096)
+    return document
+
+
+def prompt_response(text: str):
+    document = retriever.retrieval(text, max_length_output=4096)
+    prompt = get_prompt(query=text, document=document)
+    return prompt
+
+
 class Query(BaseModel):
     text: str
 
@@ -33,7 +44,17 @@ async def root():
     return {'message': 'Hello World'}
 
 
-@app.post('/get_response')
+@app.post('/retrieval_docs')
+async def get_docs(item: Query):
+    return retrieval_response(item.text)
+
+
+@app.post('/prompting')
+async def create_prompt(item: Query):
+    return prompt_response(item.text)
+
+
+@app.post('/e2e_response')
 def create_item(item: Query):
     return e2e_response(item.text)
     # return "hello"

@@ -222,8 +222,13 @@ class Retriever:
                 if len_model_tokens > 0:
                     final_result += tops_chunk_model[i] + '. '
             else:
+                result_model_tokenize = self.tokenizer.tokenize(
+                    result_model_pyvi,
+                )
                 lack_token_len = max_length_output - len_current_tokens
-                result_model = ' '.join(result_model_pyvi[:lack_token_len])
+                result_model = self.tokenizer.convert_tokens_to_string(
+                    result_model_tokenize[:lack_token_len],
+                ).replace('_', ' ')
                 final_result += result_model
                 break
         return final_result
