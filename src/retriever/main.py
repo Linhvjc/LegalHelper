@@ -14,9 +14,10 @@ from transformers import AutoTokenizer
 
 class Retriever:
     def __init__(self, model_path, database_path) -> None:
-        self.device = torch.device(
-            'cuda' if torch.cuda.is_available() else 'cpu',
-        )
+        # self.device = torch.device(
+        #     'cuda' if torch.cuda.is_available() else 'cpu',
+        # )
+        self.device = torch.device('cpu')
         self.tokenizer = AutoTokenizer.from_pretrained(model_path)
         self.model = AutoModel.from_pretrained(model_path)
         self.model = self.model.to(self.device)

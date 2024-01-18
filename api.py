@@ -9,8 +9,8 @@ from src.retriever.main import Retriever
 
 app = FastAPI()
 
-model_path = '/home/link/spaces/LinhCSE/models/retriever'
-database_path = '/home/link/spaces/LinhCSE/data/concat'
+model_path = '/home/link/spaces/chunking/LinhCSE/models/retriever'
+database_path = '/home/link/spaces/chunking/LinhCSE/data/concat'
 retriever = Retriever(
     model_path=model_path, database_path=database_path,
 )
@@ -20,7 +20,7 @@ def e2e_response(text: str):
     document = retriever.retrieval(text, max_length_output=4096)
     # print(document)
     prompt = get_prompt(query=text, document=document)
-    response = get_response(prompt, model_name='gpt35')
+    response = get_response(prompt, model_name='gpt4')
     return response
 
 
