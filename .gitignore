@@ -1,3 +1,4 @@
-raw/
-data/
-models/
+raw/*
+data/*
+models/*
+__pycache__/*
