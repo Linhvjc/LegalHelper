@@ -23,12 +23,9 @@ class LLMs:
                 messages=[{'role': 'user', 'content': message}],
             )
         elif self.model_name == 'gemini':
-            response = self.model.generate_content(input).text
+            response = self.model.generate_content(message).text
         else:
             raise NotImplementedError
-
         return response
-
-
 if __name__ == '__main__':
-    print('llm')
+    llm = LLMs(model_name='gemini')

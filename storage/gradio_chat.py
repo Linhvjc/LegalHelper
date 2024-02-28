@@ -10,8 +10,8 @@ from api import API
 images = ('assets/user.png', 'assets/bot.png')
 api = API(
     retriever_path='linhphanff/phobert-cse-legal-v1',
-    database_path='/home/link/spaces/chunking/LinhCSE/data/database',
-    retrieval_max_length=512,
+    database_path='data/database',
+    retrieval_max_length=2048,
 )
 
 with gr.Blocks() as demo:

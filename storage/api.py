@@ -35,3 +35,6 @@ class API:
         document = self.retriever.retrieval(text)
         prompt = self.prompt.get_prompt(query=text, document=document)
         return prompt
+    
+    def llm_testing (self, text: str):
+        return self.llms.get_response(text)

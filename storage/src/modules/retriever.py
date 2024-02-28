@@ -32,7 +32,7 @@ class Retriever:
         self.count_chunk_docs = np.load(
             os.path.join(database_path, 'counting.npy'),
         )
-        with open(os.path.join(database_path, 'corpus.json')) as f:
+        with open(os.path.join(database_path, 'corpus.json'), 'r', encoding='utf-8') as f:
             self.corpus = json.load(f)
         self.num_article_doc = [len(item['sections']) for item in self.corpus]
         self.retrieval_max_length = retrieval_max_length
