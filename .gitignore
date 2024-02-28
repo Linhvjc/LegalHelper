@@ -1,4 +1,6 @@
-raw/*
-data/*
-models/*
-__pycache__/*
+storage/raw/*
+storage/data/*
+storage/models/*
+storage/__pycache__/*
+storage/*.pyc
+backend/node_modules/*
