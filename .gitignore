@@ -1,6 +1,6 @@
-storage/raw/*
-storage/data/*
-storage/models/*
-storage/__pycache__/*
-storage/*.pyc
-backend/node_modules/*
+**node_modules
+**.env
+**package-lock.json
+**dist
+**raw
+**database
