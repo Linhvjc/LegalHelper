@@ -8,7 +8,7 @@ from api import API
 app = FastAPI()
 api = API(
     retriever_path='linhphanff/phobert-cse-legal-v1',
-    database_path='data/database',
+    database_path='database',
     retrieval_max_length=1024,
 )
 
@@ -19,7 +19,7 @@ class Query(BaseModel):
 
 @app.get('/')
 async def root():
-    return {'message': 'Hello World'}
+    return "Hello world"
 
 
 @app.post('/retrieval_docs')
