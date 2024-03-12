@@ -11,6 +11,7 @@ class API:
         retriever_path,
         database_path,
         retrieval_max_length,
+        llm_model_name
     ) -> None:
         self.retriever = Retriever(
             model_path=retriever_path,
@@ -18,13 +19,22 @@ class API:
             retrieval_max_length=retrieval_max_length,
         )
         self.prompt = Prompt()
-        self.llms = LLMs(model_name='gpt4')
+        self.llms = LLMs(model_name=llm_model_name)
 
-    def e2e_response(self, text: str):
+    def e2e_response(self, history: str, text: str):
+        # print(history)
+        try:
+            history = eval(history)
+            current_history = ''
+            for item in history:
+                current_history += f"{item['role']}: {item['content']}\n"
+        except:
+            current_history = history
+
         document = self.retriever.retrieval(text)
-        prompt = self.prompt.get_prompt(query=text, document=document)
+        prompt = self.prompt.get_prompt(query=text, document=document, history=current_history)
         response = self.llms.get_response(prompt)
-        self.prompt.append_history(user=text, bot=response)
+        # self.prompt.append_history(user=text, bot=response)
         return response
 
     def retrieval_response(self, text: str):
@@ -33,7 +43,7 @@ class API:
 
     def prompt_response(self, text: str):
         document = self.retriever.retrieval(text)
-        prompt = self.prompt.get_prompt(query=text, document=document)
+        prompt = self.prompt.get_prompt(query=text, document=document, history='')
         return prompt
     
     def llm_testing (self, text: str):
