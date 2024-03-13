@@ -26,6 +26,16 @@ function isCodeBlock(str: string) {
   }
   return false;
 }
+
+function splitPreprocess(content: string) {
+  try {
+    const message_arr = content.split("|||")
+    const message = message_arr[0]
+    return message
+  } catch (error) {
+    throw error
+  }
+}
 const ChatItem = ({
   content,
   role,
@@ -51,7 +61,7 @@ const ChatItem = ({
       </Avatar>
       <Box>
         {!messageBlocks && (
-          <Typography sx={{ fontSize: "20px" }}>{content}</Typography>
+          <Typography sx={{ fontSize: "20px" }}>{splitPreprocess(content)}</Typography>
         )}
         {messageBlocks &&
           messageBlocks.length &&

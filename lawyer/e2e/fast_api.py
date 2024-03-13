@@ -50,7 +50,7 @@ api = API(
     retriever_path='linhphanff/phobert-cse-legal-v1',
     database_path='database',
     retrieval_max_length=2048,
-    llm_model_name='gpt35'
+    llm_model_name='claude-3-opus'
 )
 
 class History(BaseModel):

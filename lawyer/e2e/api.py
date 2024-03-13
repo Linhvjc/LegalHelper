@@ -22,12 +22,15 @@ class API:
         self.llms = LLMs(model_name=llm_model_name)
 
     def e2e_response(self, history: str, text: str):
-        # print(history)
         try:
             history = eval(history)
             current_history = ''
             for item in history:
-                current_history += f"{item['role']}: {item['content']}\n"
+                if item['role'] == 'assistant':
+                    content, relevant = item['content'].split("|||")
+                    current_history += f"{item['role']}: {content}, {relevant}\n"
+                else:
+                    current_history += f"{item['role']}: {item['content']}\n"
         except:
             current_history = history
 
@@ -35,7 +38,7 @@ class API:
         prompt = self.prompt.get_prompt(query=text, document=document, history=current_history)
         response = self.llms.get_response(prompt)
         # self.prompt.append_history(user=text, bot=response)
-        return response
+        return f"{response}|||Relevant doc: {document}"
 
     def retrieval_response(self, text: str):
         document = self.retriever.retrieval(text)
