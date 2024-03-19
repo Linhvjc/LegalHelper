@@ -8,7 +8,7 @@ class Prompt:
 
     def get_prompt(self, query: str, document: str, history: str):
         # current_history = ' '.join(self.history)
-        prompt = f"""Answer the question as truthfully and concisely as possible using the provided context and the history, if the answer is not contained within the relevant docs and history, say "Bạn có thể cho tôi thêm thông tin về điều đó được không ?". The output must be in Vietnamese language.
+        prompt = f"""If the answer is a chitchat, Answer right away! If no, You are a professional legal virtual assistant, Answer the question as truthfully and concisely as possible using the provided context and the history, if the answer is not contained within the relevant docs and history, say "Bạn có thể cho tôi thêm thông tin về điều đó được không ?". The output must be in Vietnamese language.
         ---
         The below context is an excerpt from a official legal document.
         ---

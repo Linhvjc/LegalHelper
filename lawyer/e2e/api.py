@@ -11,7 +11,8 @@ class API:
         retriever_path,
         database_path,
         retrieval_max_length,
-        llm_model_name
+        llm_model_name,
+        history_max_length = 512
     ) -> None:
         self.retriever = Retriever(
             model_path=retriever_path,
@@ -20,17 +21,22 @@ class API:
         )
         self.prompt = Prompt()
         self.llms = LLMs(model_name=llm_model_name)
+        self.history_max_length = history_max_length
 
     def e2e_response(self, history: str, text: str):
         try:
             history = eval(history)
             current_history = ''
-            for item in history:
+            for item in history[::-1]:
                 if item['role'] == 'assistant':
                     content, relevant = item['content'].split("|||")
-                    current_history += f"{item['role']}: {content}, {relevant}\n"
+                    relevant = " ".join(relevant.split()[:64])
+                    current_history = f"{item['role']}: {content}, {relevant}\n" + current_history
                 else:
-                    current_history += f"{item['role']}: {item['content']}\n"
+                    current_history = f"{item['role']}: {item['content']}\n" + current_history
+                
+                if len(current_history.split()) > self.history_max_length:
+                    break
         except:
             current_history = history
 

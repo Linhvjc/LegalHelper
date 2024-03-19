@@ -2,6 +2,7 @@ from __future__ import annotations
 
 from fastapi import FastAPI
 from pydantic import BaseModel
+import uvicorn
 
 from api import API
 
@@ -50,7 +51,7 @@ api = API(
     retriever_path='linhphanff/phobert-cse-legal-v1',
     database_path='database',
     retrieval_max_length=2048,
-    llm_model_name='claude-3-opus'
+    llm_model_name='gpt-4-32k'
 )
 
 class History(BaseModel):
@@ -82,3 +83,6 @@ def e2e(history: History, query: Query):
 @app.post('/llm_test')
 def llm_test(item: Query):
     return api.llm_testing(item.text)
+
+if __name__ == "__main__":
+    uvicorn.run("fast_api:app", host="0.0.0.0", port=8000, reload=True)
