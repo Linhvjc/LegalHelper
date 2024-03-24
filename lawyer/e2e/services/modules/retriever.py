@@ -11,8 +11,8 @@ from rank_bm25 import BM25Okapi
 from transformers import AutoModel
 from transformers import AutoTokenizer
 
-from src.utils.utils import aggregate_score
-from src.utils.utils import encode
+from ..utils.utils import aggregate_score
+from ..utils.utils import encode
 
 
 class Retriever:

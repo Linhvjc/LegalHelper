@@ -5,4 +5,5 @@ client = MongoClient(
 
 db = client.chatbot
 
-collection_name = db['prompts']
+PROMPT_COLLECTION = db['prompts']
+PARAMETER_COLLECTION = db['parameters']
