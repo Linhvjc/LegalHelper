@@ -1,11 +1,11 @@
 from __future__ import annotations
 
-from src.modules.llms import LLMs
-from src.modules.prompt import Prompt
-from src.modules.retriever import Retriever
+from services.modules.llms import LLMs
+from services.modules.prompt import Prompt
+from services.modules.retriever import Retriever
 
 
-class API:
+class ChatController:
     def __init__(
         self,
         retriever_path,
@@ -43,7 +43,6 @@ class API:
         document = self.retriever.retrieval(text)
         prompt = self.prompt.get_prompt(query=text, document=document, history=current_history)
         response = self.llms.get_response(prompt)
-        # self.prompt.append_history(user=text, bot=response)
         return f"{response}|||Relevant doc: {document}"
 
     def retrieval_response(self, text: str):

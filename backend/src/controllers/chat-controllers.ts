@@ -23,9 +23,8 @@ export const generateChatCompletion = async (
     user.chats.push({ content: message, role: "user" });
 
     const botResponse = await getResponse(chats, message);
-    // console.log(botResponse)
 
-    user.chats.push({ content: botResponse, role: "assistant" });
+    user.chats.push({ content: botResponse, role: "assistant"});
     await user.save();
     return res.status(200).json({ chats: user.chats });
   } catch (error) {

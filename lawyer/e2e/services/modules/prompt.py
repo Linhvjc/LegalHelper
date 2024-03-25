@@ -21,9 +21,6 @@ class Prompt:
         Answer:"""
 
         return prompt
+    
+    
 
-    # def append_history(self, user, bot):
-    #     if len(self.history) == self.saved_turn*2:
-    #         self.history = self.history[2:]
-    #     self.history.append(f'User: {user}\n')
-    #     self.history.append(f'Bot: {bot}\n')
