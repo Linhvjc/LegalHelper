@@ -6,7 +6,8 @@ import TableCell from '@mui/material/TableCell';
 import TableContainer from '@mui/material/TableContainer';
 import TableHead from '@mui/material/TableHead';
 import TableRow from '@mui/material/TableRow';
-
+import { getParameters, deleteParameter } from '../../helpers/api-admin';
+import { useEffect } from 'react';
 interface Column {
   id: 'name' | 'retriever' | 'generative' | 'database' | 'maxLength' | 'isSelected'| 'deleteID';
   label: string;
@@ -73,88 +74,116 @@ function createData(
   return { name, retriever, generative, database, maxLength, isSelected, deleteID };
 }
 
-const rows = [
-  createData('test name 1', 'test retrieval 1', 'test generative 1', 'test database 1', 2048, false, '1'),
-  createData('test name 2', 'test retrieval 2', 'test generative 2', 'test database 2', 2048, true, '2'),
-  createData('test name 3', 'test retrieval 3', 'test generative 3', 'test database 3', 2048, false, '3'),
-  createData('test name 4', 'test retrieval 4', 'test generative 4', 'test database 4', 2048, false, '4'),
-];
 
 export default function StickyHeadTableParam() {
   const [page, setPage] = React.useState(0);
   const [rowsPerPage, setRowsPerPage] = React.useState(10);
+  const [rows, setRows] = React.useState<Data[]>([]);
 
-  const handleDelete = (id: string) => {
-    console.log(id);
+  useEffect(() => {
+    async function fetchData() {
+      const data = await getParameters();
+      const updatedRows = data.map((item: { [x: string]: string; }) =>
+        createData(
+          item['name'],
+          item['retriever_model_path_or_name'],
+          item['generative_model_path_or_name'],
+          item['database_path'],
+          parseInt(item['retrieval_max_length']),
+          true ? item['isSeletected'] === 'True' : false,
+          item['_id']
+        )
+      );
+      setRows(updatedRows);
+    }
+
+    fetchData();
+  }, []);
+  
+  const handleDelete = async (id: string) => {
+    try {
+      await deleteParameter(id);
+      const updatedRows = rows.filter((row) => row.deleteID !== id);
+      setRows(updatedRows);
+    } catch (error) {
+      console.error('Error deleting parameter:', error);
+    }
   };
 
   return (
     <Paper sx={{ width: '100%', overflow: 'hidden' }}>
-      <TableContainer sx={{ maxHeight: 440 }}>
-        <Table stickyHeader aria-label="sticky table" sx={{ background: 'rgba(0, 0, 0, 0.7)', color: 'white' }}>
-          <TableHead>
-            <TableRow>
-              {columns.map((column) => (
-                <TableCell
-                  key={column.id}
-                  align={column.align}
-                  style={{
-                    minWidth: column.minWidth,
-                    color: 'white',
-                    background: 'gray',
-                    fontWeight: 'bold',
-                    fontSize: '1.2rem',
-                  }}
-                >
-                  {column.label}
-                </TableCell>
-              ))}
-            </TableRow>
-          </TableHead>
-          <TableBody>
-            {rows
-              .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
-              .map((row) => {
-                return (
-                  <TableRow hover role="checkbox" tabIndex={-1} key={row.retriever}>
-                    {columns.map((column) => {
-                      const value = row[column.id];
-                      return (
-                        <TableCell
-                          key={column.id}
-                          align={column.align}
+  <TableContainer sx={{ maxHeight: 440 }}>
+    <Table stickyHeader aria-label="sticky table" sx={{ background: 'rgba(0, 0, 0, 0.7)', color: 'white' }}>
+      <TableHead>
+        <TableRow>
+          {columns.map((column) => (
+            <TableCell
+              key={column.id}
+              align={column.align}
+              style={{
+                color: 'white',
+                background: 'gray',
+                fontWeight: 'bold',
+                fontSize: '1.2rem',
+                flex: 1, // Set equal flex for each column
+                wordWrap: 'break-word', // Enable content wrapping
+                overflow: 'hidden', // Hide overflowing text
+                textOverflow: 'ellipsis', // Display ellipsis for overflowing text
+              }}
+            >
+              {column.label}
+            </TableCell>
+          ))}
+        </TableRow>
+      </TableHead>
+      <TableBody>
+        {rows
+          .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
+          .map((row) => {
+            return (
+              <TableRow hover role="checkbox" tabIndex={-1} key={row.retriever}>
+                {columns.map((column) => {
+                  const value = row[column.id];
+                  return (
+                    <TableCell
+                      key={column.id}
+                      align={column.align}
+                      style={{
+                        color: 'white',
+                        flex: 1, // Set equal flex for each column
+                        wordWrap: 'break-word', // Enable content wrapping
+                        overflow: 'hidden', // Hide overflowing text
+                        textOverflow: 'ellipsis', // Display ellipsis for overflowing text
+                      }}
+                    >
+                      {column.id === 'isSelected' ? (
+                        <input type="radio" checked={Boolean(value)} readOnly />
+                      ) : column.id === 'deleteID' ? (
+                        <button
+                          onClick={() => handleDelete(value.toString())}
                           style={{
                             color: 'white',
+                            background: 'red',
+                            border: 'none',
+                            padding: '5px 10px',
+                            borderRadius: '5px',
+                            cursor: 'pointer',
                           }}
                         >
-                          {column.id === 'isSelected' ? (
-                            <input type="radio" checked={Boolean(value)} readOnly />
-                          ) : column.id === 'deleteID' ? (
-                            <button
-                              onClick={() => handleDelete(value.toString())}
-                              style={{
-                                color: 'white',
-                                background: 'red',
-                                border: 'none',
-                                padding: '5px 10px',
-                                borderRadius: '5px',
-                                cursor: 'pointer',
-                              }}
-                            >
-                              Delete
-                            </button>
-                          ) : (
-                            column.format && typeof value === 'number' ? column.format(value) : value
-                          )}
-                        </TableCell>
-                      );
-                    })}
-                  </TableRow>
-                );
-              })}
-          </TableBody>
-        </Table>
-      </TableContainer>
-    </Paper>
+                          Delete
+                        </button>
+                      ) : (
+                        column.format && typeof value === 'number' ? column.format(value) : value
+                      )}
+                    </TableCell>
+                  );
+                })}
+              </TableRow>
+            );
+          })}
+      </TableBody>
+    </Table>
+  </TableContainer>
+</Paper>
   );
 }

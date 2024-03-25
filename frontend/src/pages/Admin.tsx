@@ -1,11 +1,12 @@
 import { Box, useMediaQuery, useTheme } from "@mui/material";
-import React from "react";
+import React, { useEffect } from "react";
 import TypingAnimAdmin from "../components/typer/TypingAnimAdmin";
 import StickyHeadTableParam from "../components/table/StickyHeadTableParam";
+import StickyHeadTable from "../components/table/StickyHeadTable";
 import CollapsibleTable from "../components/table/CollapsibleTable";
 
 
-const Home = () => {
+const Admin = () => {
   const theme = useTheme();
   const isBelowMd = useMediaQuery(theme.breakpoints.down("md"));
   return (
@@ -32,7 +33,7 @@ const Home = () => {
             my: 10,
           }}
         >
-          <StickyHeadTableParam />
+          <StickyHeadTable />
         </Box>
         <Box
           sx={{
@@ -63,4 +64,4 @@ const Home = () => {
   );
 };
 
-export default Home;
+export default Admin;
