@@ -5,4 +5,4 @@ class Prompt(BaseModel):
     name: str
     description: str
     content: str
-    isSeletected: bool = Field(default=False)
+    isSelected: bool = Field(default=False)

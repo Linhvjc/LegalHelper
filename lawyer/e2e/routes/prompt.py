@@ -43,7 +43,7 @@ async def delete_prompt(id: str):
 @router.get("/get_selected")
 async def get_selected_prompts():
     try:
-        prompts = list_serial(PROMPT_COLLECTION.find({"isSeletected": True}))
+        prompts = list_serial(PROMPT_COLLECTION.find({"isSelected": True}))
         return prompts[0]
     except Exception as e:
         return f"Error: {e}"

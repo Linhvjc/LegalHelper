@@ -7,3 +7,4 @@ db = client.chatbot
 
 PROMPT_COLLECTION = db['prompts']
 PARAMETER_COLLECTION = db['parameters']
+USER_COLLECTION = db['users']
