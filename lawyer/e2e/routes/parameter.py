@@ -46,7 +46,20 @@ async def delete_parameter(id: str):
 async def get_selected_parameters():
     try:
         parameters = list_serial(
-            PARAMETER_COLLECTION.find({"isSeletected": True}))
+            PARAMETER_COLLECTION.find({"isSelected": True}))
         return parameters[0]
+    except Exception as e:
+        return f"Error: {e}"
+
+
+@router.post("/set_selected/{id}")
+async def set_selected_parameter(id: str):
+    try:
+        PARAMETER_COLLECTION.update_many({}, {"$set": {"isSelected": False}})
+
+        PARAMETER_COLLECTION.find_one_and_update(
+            {"_id": ObjectId(id)}, {"$set": {"isSelected": True}})
+
+        return {"message": "Selected parameter updated successfully."}
     except Exception as e:
         return f"Error: {e}"

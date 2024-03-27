@@ -1,5 +1,5 @@
 from fastapi import FastAPI
-from routes import prompt, parameter, chatbot
+from routes import prompt, parameter, chatbot, user
 from fastapi.middleware.cors import CORSMiddleware
 import uvicorn
 
@@ -16,6 +16,7 @@ app.add_middleware(
 app.include_router(prompt.router)
 app.include_router(parameter.router)
 app.include_router(chatbot.router)
+app.include_router(user.router)
 
 
 @app.get("/")
@@ -24,4 +25,4 @@ def root():
 
 
 if __name__ == "__main__":
-    uvicorn.run("main:app", host="0.0.0.0", port=8001, reload=True)
+    uvicorn.run("main:app", host="0.0.0.0", port=8000, reload=True)
