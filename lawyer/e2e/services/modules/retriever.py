@@ -137,7 +137,6 @@ class Retriever:
 
         final_result = ''
         idx_contain = []
-        self.retrieval_max_length = self.retrieval_max_length - 200
         for i in range(len(tops_chunk_model)):
 
             tops_chunk_model[i] = '' if tops_idx_model[i] in idx_contain else tops_chunk_model[i]
