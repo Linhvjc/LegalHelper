@@ -9,15 +9,13 @@ import TableRow from '@mui/material/TableRow';
 import { MdDelete } from "react-icons/md";
 import TextField from '@mui/material/TextField';
 import {
-  getParameters,
-  deleteParameter,
-  setSelectedParameter,
-  addParameter
-} from '../../helpers/api-admin/parameter';
+  getUsers,
+  deleteUser,
+} from '../../helpers/api-admin/user';
 import { useEffect, useState } from 'react';
 
 interface Column {
-  id: 'name' | 'retriever' | 'generative' | 'database' | 'maxLength' | 'isSelected' | 'deleteID';
+  id: 'name' | 'email' | 'deleteID';
   label: string;
   minWidth?: number;
   align?: 'left' | 'center';
@@ -26,32 +24,7 @@ interface Column {
 
 const columns: readonly Column[] = [
   { id: 'name', label: 'Name', minWidth: 50 },
-  { id: 'retriever', label: 'Retrieval Model', minWidth: 100 },
-  {
-    id: 'generative',
-    label: 'Generative Model',
-    minWidth: 100,
-    align: 'left',
-  },
-  {
-    id: 'database',
-    label: 'Database Path',
-    minWidth: 100,
-    align: 'left',
-  },
-  {
-    id: 'maxLength',
-    label: 'Max Length',
-    minWidth: 50,
-    align: 'left',
-    format: (value: number) => value.toFixed(2),
-  },
-  {
-    id: 'isSelected',
-    label: 'isSelected',
-    minWidth: 50,
-    align: 'left',
-  },
+  { id: 'email', label: 'Email', minWidth: 100 },
   {
     id: 'deleteID',
     label: 'Action',
@@ -62,27 +35,19 @@ const columns: readonly Column[] = [
 
 interface Data {
   name: string;
-  retriever: string;
-  generative: string;
-  database: string;
-  maxLength: number;
-  isSelected: boolean;
+  email: string;
   deleteID: string;
 }
 
 function createData(
   name: string,
-  retriever: string,
-  generative: string,
-  database: string,
-  maxLength: number,
-  isSelected: boolean,
+  email: string,
   deleteID: string
 ): Data {
-  return { name, retriever, generative, database, maxLength, isSelected, deleteID };
+  return { name, email, deleteID };
 }
 
-export default function StickyHeadTableParam() {
+export default function StickyHeadTableUser() {
   const [page, setPage] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(10);
   const [rows, setRows] = useState<Data[]>([]);
@@ -90,19 +55,15 @@ export default function StickyHeadTableParam() {
   useEffect(() => {
     async function fetchData() {
     try {
-      const data = await getParameters();
+      const data = await getUsers();
       const updatedRows = data.map((item: { [x: string]: string }) =>
         createData(
           item['name'],
-          item['retriever_model_path_or_name'],
-          item['generative_model_path_or_name'],
-          item['database_path'],
-          parseInt(item['retrieval_max_length']),
-          true ? item['isSelected'] === 'True' : false,
+          item['email'],
           item['_id']
         )
       );
-      updatedRows.push(createData('', '', '', '', 0, false, ''));
+      updatedRows.push(createData('', '', ''));
       
       setRows(updatedRows);
     } catch (error) {
@@ -110,7 +71,7 @@ export default function StickyHeadTableParam() {
       console.error('An error occurred:', error);
       
       // Create fake data
-      const fakeData = createData('Fake Name', 'Fake Retriever', 'Fake Generative', 'Fake Database', 10, true, 'fakeId');
+      const fakeData = createData('Fake Name', 'Fake Email', 'fakeId');
       const updatedRows = [fakeData];
       
       setRows(updatedRows);
@@ -122,60 +83,15 @@ export default function StickyHeadTableParam() {
 
   const handleDelete = async (id: string) => {
     try {
-      await deleteParameter(id);
+      await deleteUser(id);
       const updatedRows = rows.filter((row) => row.deleteID !== id);
       setRows(updatedRows);
     } catch (error) {
-      console.error('Error deleting parameter:', error);
+      console.error('Error deleting user:', error);
     }
   };
   
-  const handleAdd = async () => {
-    try {
-      const lastRowIndex = rows.length - 1;
-      const lastRowData = rows[lastRowIndex];
-      console.log("*******: ", lastRowData);
-      await addParameter(
-        lastRowData['name'],
-        lastRowData['retriever'],
-        lastRowData['generative'],
-        lastRowData['database'],
-        lastRowData['maxLength'],
-        lastRowData['isSelected']
-      )
-      const updatedRows = [...rows];
-      updatedRows[lastRowIndex] = {
-        ...lastRowData,
-        name: '',
-        retriever: '',
-        generative: '',
-        database: '',
-        maxLength: 0,
-        isSelected: false,
-        deleteID: ''
-      };
-      setRows(updatedRows);
-    } catch (error) {
-      console.error('Error deleting parameter:', error);
-    }
-  };
 
-  const handleSelect = async (id: string) => {
-    try {
-      await setSelectedParameter(id);
-      // Update the isSelected field for the selected item in the local state
-      const updatedRows = rows.map((row) => {
-        if (row.deleteID === id) {
-          return { ...row, isSelected: true };
-        } else {
-          return { ...row, isSelected: false };
-        }
-      });
-      setRows(updatedRows);
-    } catch (error) {
-      console.error('Error setting selected parameter:', error);
-    }
-  };
 
   return (
     <Paper sx={{ width: '100%', overflow: 'hidden' }}>
@@ -209,7 +125,7 @@ export default function StickyHeadTableParam() {
               .map((row, index) => {
                 const isLastRow = index === rows.length - 1;
                 return (
-                  <TableRow hover role="checkbox" tabIndex={-1} key={row.retriever}>
+                  <TableRow hover role="checkbox" tabIndex={-1} key={row.email}>
                     {columns.map((column) => {
                       const value = row[column.id];
                       return (
@@ -224,17 +140,10 @@ export default function StickyHeadTableParam() {
                             textOverflow: 'ellipsis', // Display ellipsis for overflowing text
                           }}
                         >
-                          {column.id === 'isSelected' ? (
-                            <input
-                              type="radio"
-                              checked={Boolean(value)}
-                              onChange={() => handleSelect(row.deleteID)}
-                            />
-                          ) : column.id === 'deleteID' ? (
+                          {column.id === 'deleteID' ? (
                               isLastRow ?
                                 (
                               <button
-                                onClick={() => handleAdd()}
                                 style={{
                                   color: 'white',
                                   background: 'green',
