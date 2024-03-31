@@ -4,6 +4,7 @@ import TypingAnimAdmin from "../components/typer/TypingAnimAdmin";
 import StickyHeadTableParam from "../components/table/StickyHeadTableParam";
 import StickyHeadTable from "../components/table/StickyHeadTable";
 import CollapsibleTable from "../components/table/CollapsibleTable";
+import StickyHeadTableUser from "../components/table/StickyHeadTableUser";
 
 
 const Admin = () => {
@@ -24,7 +25,30 @@ const Admin = () => {
         <Box>
           <TypingAnimAdmin />
         </Box>
+        
         <Box
+          sx={{
+            width: "90%",
+            display: "flex",
+            flexDirection: { md: "row", xs: "column", sm: "column" },
+            gap: 5,
+            my: 10,
+          }}
+        >
+          <StickyHeadTableUser />
+        </Box>
+        <Box
+          sx={{
+            width: "90%",
+            display: "flex",
+            flexDirection: { md: "row", xs: "column", sm: "column" },
+            gap: 5,
+            my: 10,
+          }}
+        >
+          <StickyHeadTableParam />
+        </Box>
+        {/* <Box
           sx={{
             width: "80%",
             display: "flex",
@@ -44,20 +68,8 @@ const Admin = () => {
             my: 10,
           }}
         >
-          <StickyHeadTableParam />
-        </Box>
-
-        <Box
-          sx={{
-            width: "80%",
-            display: "flex",
-            flexDirection: { md: "row", xs: "column", sm: "column" },
-            gap: 5,
-            my: 10,
-          }}
-        >
           <CollapsibleTable />
-        </Box>
+        </Box> */}
       </Box>
       {/* <Footer /> */}
     </Box>
