@@ -1,8 +1,6 @@
 from fastapi import APIRouter
-from bson import ObjectId
 from loguru import logger
 
-from models.parameter import Parameter
 from models.message import Message
 from models.history import History
 from config.database import PARAMETER_COLLECTION
@@ -21,14 +19,15 @@ try:
         database_path=selected_parameter['database_path'],
         retrieval_max_length=int(selected_parameter['retrieval_max_length']),
     )
-except:
-    controller = ChatController(
-        retriever_path='linhphanff/phobert-cse-legal-v1',
-        llm_model_name='gpt-4-32k',
-        database_path="/home/link/spaces/chunking/LegalHelper/lawyer/e2e/database",
-        retrieval_max_length=2048,
-    )
+except Exception as e:
+    # controller = ChatController(
+    #     retriever_path='linhphanff/phobert-cse-legal-v1',
+    #     llm_model_name='vistral',
+    #     database_path="/home/link/spaces/chunking/LegalHelper/lawyer/e2e/database",
+    #     retrieval_max_length=2048,
+    # )
     logger.warning("Some parameter doesn't match")
+    raise e
 
 
 @router.post('/retrieval_docs')
@@ -49,3 +48,6 @@ def e2e(history: History, query: Message):
 @router.post('/llm_test')
 def llm_test(item: Message):
     return controller.llm_testing(item.content)
+
+if __name__ == '__main__':
+    print('abc')
