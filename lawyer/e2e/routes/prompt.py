@@ -47,3 +47,6 @@ async def get_selected_prompts():
         return prompts[0]
     except Exception as e:
         return f"Error: {e}"
+
+if __name__ == '__main__':
+    print('abc')

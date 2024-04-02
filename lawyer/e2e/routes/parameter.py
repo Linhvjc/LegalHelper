@@ -63,3 +63,6 @@ async def set_selected_parameter(id: str):
         return {"message": "Selected parameter updated successfully."}
     except Exception as e:
         return f"Error: {e}"
+
+if __name__ == '__main__':
+    print('abc')

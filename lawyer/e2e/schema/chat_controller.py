@@ -41,7 +41,7 @@ class ChatController:
             current_history = history
 
         document = self.retriever.retrieval(text)
-        prompt = self.prompt.get_prompt(query=text, document=document, history=current_history)
+        prompt = self.prompt.get_prompt_vi(query=text, document=document, history=current_history)
         response = self.llms.get_response(prompt)
         return f"{response}|||Relevant doc: {document}"
 
@@ -56,3 +56,6 @@ class ChatController:
     
     def llm_testing (self, text: str):
         return self.llms.get_response(text)
+
+if __name__ == '__main__':
+    print('chat controller')

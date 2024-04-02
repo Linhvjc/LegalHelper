@@ -47,3 +47,7 @@ def aggregate_score(embedding_query, embedding_corpus_full, count_chunk_docs):
         scores_document.append(real_score)
 
     return scores_chunk, scores_document
+
+
+if __name__ == '__main__':
+    print('abc')

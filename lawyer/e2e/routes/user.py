@@ -40,3 +40,6 @@ async def delete_user(id: str):
         USER_COLLECTION.find_one_and_delete({"_id": ObjectId(id)})
     except Exception as e:
         return f"Error: {e}"
+
+if __name__ == '__main__':
+    print('abc')
