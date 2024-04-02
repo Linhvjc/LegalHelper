@@ -1,4 +1,4 @@
-import React, { useEffect, useLayoutEffect, useRef, useState } from "react";
+import React, { useEffect, useLayoutEffect, useRef, useState, KeyboardEvent } from "react";
 import { Box, Avatar, Typography, Button, IconButton } from "@mui/material";
 import red from "@mui/material/colors/red";
 import { useAuth } from "../context/AuthContext";
@@ -42,6 +42,11 @@ const Chat = () => {
       toast.error("Deleting chats failed", { id: "deletechats" });
     }
   };
+  const handleKeyPress = (event: KeyboardEvent<HTMLInputElement>) => {
+    if (event.key === "Enter") {
+      handleSubmit();
+    }
+  };
   useLayoutEffect(() => {
     if (auth?.isLoggedIn && auth.user) {
       toast.loading("Loading Chats", { id: "loadchats" });
@@ -60,7 +65,23 @@ const Chat = () => {
     if (!auth?.user) {
       return navigate("/login");
     }
-  }, [auth]);
+
+    const chatBlockElement = document.getElementById("chat-block");
+    if (chatBlockElement) {
+      chatBlockElement.scrollTop = chatBlockElement.scrollHeight;
+      console.log("chatBlockElement.scrollTop:",chatBlockElement.scrollTop)
+      console.log("chatBlockElement.scrollHeight:",chatBlockElement.scrollHeight)
+    }
+    const handleNewMessage = () => {
+      if (chatBlockElement) {
+        chatBlockElement.scrollTop = chatBlockElement.scrollHeight;
+      }
+    };
+    chatBlockElement?.addEventListener("DOMNodeInserted", handleNewMessage);
+    return () => {
+      chatBlockElement?.removeEventListener("DOMNodeInserted", handleNewMessage);
+    };
+  }, [auth, navigate]);
   return (
     <Box
       sx={{
@@ -145,9 +166,10 @@ const Chat = () => {
             fontWeight: "600",
           }}
         >
-          Model - GPT 3.5 Turbo
+          Model - Vistral model
         </Typography>
         <Box
+          id= "chat-block"
           sx={{
             width: "100%",
             height: "60vh",
@@ -188,6 +210,7 @@ const Chat = () => {
               color: "white",
               fontSize: "20px",
             }}
+            onKeyDown={handleKeyPress}
           />
           <IconButton onClick={handleSubmit} sx={{ color: "white", mx: 1 }}>
             <IoMdSend />
