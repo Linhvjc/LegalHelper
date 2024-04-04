@@ -15,7 +15,7 @@ class LLMs:
             print("******Load Mistral Model******")
             self.llm = LLM(model="Viet-Mistral/Vistral-7B-Chat", dtype=torch.float16)
             self.tokenizer = self.llm.get_tokenizer()
-            self.sampling_params = SamplingParams(temperature=0.1, top_p=0.95, max_tokens=256)
+            self.sampling_params = SamplingParams(temperature=0.1, top_p=0.95, max_tokens=512)
             print("******Load Mistral Model Successfully******")
 
 

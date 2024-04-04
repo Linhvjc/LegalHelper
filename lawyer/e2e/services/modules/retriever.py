@@ -5,40 +5,45 @@ import os
 
 import numpy as np
 import torch
-from loguru import logger
 from pyvi import ViTokenizer
-from rank_bm25 import BM25Okapi
 from transformers import AutoModel
 from transformers import AutoTokenizer
+from typing import Optional
 
 from ..utils.utils import aggregate_score
 from ..utils.utils import encode
+from ..utils.bm25 import BM25Plus
 
 
 class Retriever:
-    def __init__(self, model_path, database_path, retrieval_max_length) -> None:
-        # self.device = torch.device(
-        #     'cuda' if torch.cuda.is_available() else 'cpu',
-        # )
-        self.device = torch.device('cpu')
+    def __init__(self,
+                 model_path: Optional[str] = None,
+                 database_path: Optional[str] = None,
+                 retrieval_max_length: Optional[int] = None
+                 ) -> None:
+        self.device = torch.device(
+            'cuda' if torch.cuda.is_available() else 'cpu',
+        )
+        # self.device = torch.device('cpu')
         self.tokenizer = AutoTokenizer.from_pretrained(model_path)
         self.model = AutoModel.from_pretrained(model_path).to(self.device)
+        if database_path:
+            self.embedding_corpus_full = np.load(
+                os.path.join(database_path, 'corpus.npy'),
+            )
+            self.embedding_article = np.load(
+                os.path.join(database_path, 'articles.npy'),
+            )
+            self.count_chunk_docs = np.load(
+                os.path.join(database_path, 'counting.npy'),
+            )
+            with open(os.path.join(database_path, 'corpus.json'), 'r', encoding='utf-8') as f:
+                self.corpus = json.load(f)
+            self.num_article_doc = [len(item['sections'])
+                                    for item in self.corpus]
+            self.retrieval_max_length = retrieval_max_length
 
-        self.embedding_corpus_full = np.load(
-            os.path.join(database_path, 'corpus.npy'),
-        )
-        self.embedding_article = np.load(
-            os.path.join(database_path, 'articles.npy'),
-        )
-        self.count_chunk_docs = np.load(
-            os.path.join(database_path, 'counting.npy'),
-        )
-        with open(os.path.join(database_path, 'corpus.json'), 'r', encoding='utf-8') as f:
-            self.corpus = json.load(f)
-        self.num_article_doc = [len(item['sections']) for item in self.corpus]
-        self.retrieval_max_length = retrieval_max_length
-
-    def _search_by_bm25(self, query: str, top_best_document) -> str:
+    async def _search_by_bm25(self, query: str, top_best_document) -> str:
         articles_texts = []
         articles_id = []
         texts_splitted = []
@@ -59,16 +64,15 @@ class Retriever:
             value in zip(articles_texts, articles_id)
         }
 
-        bm25 = BM25Okapi(texts_splitted)
+        bm25 = BM25Plus(texts_splitted)
         query = query.lower().split()
 
-        tops_chunk = bm25.get_top_n(
-            query, list(articles_mapping.keys()), n=5,
-        )
-        tops_idx = [articles_mapping[chunk] for chunk in tops_chunk]
+        tops_scores = bm25.get_scores(query)
+        tops_idx = np.argsort(-tops_scores)[:5]
+        tops_chunk = [list(articles_mapping.keys())[idx] for idx in tops_idx]
         return tops_chunk, tops_idx
 
-    def _search_by_model(self, top_best_document, top_5_best_doc_idx, embedding_query):
+    async def _search_by_model(self, top_best_document, top_5_best_doc_idx, embedding_query):
         articles_texts = []
         articles_id = []
         for doc in top_best_document:
@@ -104,7 +108,7 @@ class Retriever:
         tops_idx = [articles_id[idx] for idx in top5_best_doc]
         return tops_chunk, tops_idx
 
-    def retrieval(self, text):
+    async def retrieval(self, text):
         embedding_query = encode(
             tokenizer=self.tokenizer,
             model=self.model,
@@ -124,14 +128,14 @@ class Retriever:
         top_best_document = [self.corpus[idx] for idx in top_5_best_doc_idx]
 
         #! Get result by model
-        tops_chunk_model, tops_idx_model = self._search_by_model(
+        tops_chunk_model, tops_idx_model = await self._search_by_model(
             top_best_document=top_best_document,
             top_5_best_doc_idx=top_5_best_doc_idx,
             embedding_query=embedding_query,
         )
 
         #! Get result by bm25
-        tops_chunk_bm25, tops_idx_bm25 = self._search_by_bm25(
+        tops_chunk_bm25, tops_idx_bm25 = await self._search_by_bm25(
             query=text,
             top_best_document=top_best_document,
         )
@@ -172,6 +176,67 @@ class Retriever:
                 final_result += result_model
                 break
         return final_result
+
+    def retrieval_tool(self, docs: list, query: str, output_length):
+        embedding_query = encode(
+            tokenizer=self.tokenizer,
+            model=self.model,
+            text=query,
+        )
+        embedding_corpus = None
+        for i in range(0, len(docs), 16):
+            embedding = self._encode(
+                texts=docs[i:i+16],
+                max_seq_len=256
+            )
+
+            if embedding_corpus is None:
+                embedding_corpus = embedding.detach().cpu().numpy()
+            else:
+                embedding_corpus = np.append(
+                    embedding_corpus,
+                    embedding.detach().cpu().numpy(),
+                    axis=0,
+                )
+        scores = (
+            embedding_query.cpu().detach().numpy() @
+            embedding_corpus.T
+        ).squeeze(0)
+
+        top_best_doc = sorted(
+            range(len(scores)),
+            key=lambda i: scores[i], reverse=True,
+        )
+        docs_relevant_sort = [docs[idx] for idx in top_best_doc]
+        final_result = ""
+        for item in docs_relevant_sort:
+            if len(final_result.split()) + len(item.split()) < output_length:
+                final_result += f"{item}. "
+
+        return final_result
+
+    def _encode(self, texts, max_seq_len):
+        texts = [ViTokenizer.tokenize(text) for text in texts]
+        features = self.tokenizer(
+            texts,
+            max_length=max_seq_len,
+            padding='max_length',
+            truncation=True,
+            return_tensors='pt',
+            pad_to_multiple_of=max_seq_len
+        )
+        # with torch.no_grad():
+        inputs = {
+            'input_ids': features['input_ids'].to(self.model.device),
+            'attention_mask': features['attention_mask'].to(self.model.device),
+            'token_type_ids': features['token_type_ids'].to(self.model.device),
+        }
+        embedding_query = self.model(**inputs)
+        embedding_query = embedding_query.last_hidden_state.mean(
+            dim=1,
+        )  # AVG token
+
+        return embedding_query
 
 
 def main_retrieval():
