@@ -21,9 +21,7 @@ export const generateChatCompletion = async (
     })) as ChatCompletionRequestMessage[];
     chats.push({ content: message, role: "user" });
     user.chats.push({ content: message, role: "user" });
-
     const botResponse = await getResponse(chats, message);
-
     user.chats.push({ content: botResponse, role: "assistant"});
     await user.save();
     return res.status(200).json({ chats: user.chats });

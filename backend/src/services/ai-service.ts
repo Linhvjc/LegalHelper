@@ -5,7 +5,7 @@ const instance = axios.default.create({
 
 export const getResponse = async (chats, message) => {
     try {
-        const history = { content: JSON.stringify(chats) };
+        const history = { content: JSON.stringify(chats.slice(-9)) };
         const res = await instance.post("/chatbot/e2e_response", { history, query: { content: message } });
         const data = await res.data;
         // console.log(data)
