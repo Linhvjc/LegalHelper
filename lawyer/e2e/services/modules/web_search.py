@@ -8,7 +8,7 @@ import numpy as np
 from services.utils.bm25 import BM25Plus
 
 
-def web_search(query, index=0, relevant_max_length=1024):
+async def web_search(query, index=0, relevant_max_length=1024):
     fallback = 'Sorry, I cannot think of a reply for that.'
     result = ''
 
@@ -31,6 +31,8 @@ def web_search(query, index=0, relevant_max_length=1024):
             docs.append(item.strip())
             tokenized_docs.append(item.strip().split(" "))
             article_text += item
+        if len(tokenized_docs) == 0:
+            return ""
 
         article_text = article_text.replace('\n', '')
         first_sentence = article_text.split('.')
@@ -65,5 +67,5 @@ def web_search(query, index=0, relevant_max_length=1024):
 
 
 if __name__ == "__main__":
-    answer = chatbot_query('vợ chồng ly dị thì tài sản thuộc về ai')
+    answer = web_search('vợ chồng ly dị thì tài sản thuộc về ai')
     print(answer)

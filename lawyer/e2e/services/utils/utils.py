@@ -5,7 +5,7 @@ from transformers import PreTrainedModel
 from transformers import PreTrainedTokenizer
 
 
-def encode(tokenizer: PreTrainedTokenizer, model: PreTrainedModel, text):
+async def encode(tokenizer: PreTrainedTokenizer, model: PreTrainedModel, text):
     text = ViTokenizer.tokenize(text)
     features = tokenizer(
         text=text,
@@ -27,7 +27,7 @@ def encode(tokenizer: PreTrainedTokenizer, model: PreTrainedModel, text):
     return embedding_query
 
 
-def aggregate_score(embedding_query, embedding_corpus_full, count_chunk_docs):
+async def aggregate_score(embedding_query, embedding_corpus_full, count_chunk_docs):
     scores_chunk = (
         embedding_query.cpu().detach().numpy() @
         embedding_corpus_full.T

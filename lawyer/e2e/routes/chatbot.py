@@ -20,19 +20,19 @@ try:
         retrieval_max_length=int(selected_parameter['retrieval_max_length']),
     )
 except Exception as e:
-    # controller = ChatController(
-    #     retriever_path='linhphanff/phobert-cse-legal-v1',
-    #     llm_model_name='vistral',
-    #     database_path="/home/link/spaces/chunking/LegalHelper/lawyer/e2e/database",
-    #     retrieval_max_length=2048,
-    # )
+    controller = ChatController(
+        retriever_path='linhphanff/phobert-cse-legal-v1',
+        llm_model_name='vistral',
+        database_path="/home/link/spaces/chunking/LegalHelper/lawyer/e2e/database",
+        retrieval_max_length=2048,
+    )
     logger.warning("Some parameter doesn't match")
     raise e
 
 
 @router.post('/retrieval_docs')
 async def get_docs(item: Message):
-    return controller.retrieval_response(item.content)
+    return await controller.retrieval_response(item.content)
 
 
 @router.post('/prompting')
@@ -41,8 +41,8 @@ async def create_prompt(item: Message):
 
 
 @router.post('/e2e_response')
-def e2e(history: History, query: Message):
-    return controller.e2e_response(history.content, query.content)
+async def e2e(history: History, query: Message):
+    return await controller.e2e_response(history.content, query.content)
 
 
 @router.post('/llm_test')

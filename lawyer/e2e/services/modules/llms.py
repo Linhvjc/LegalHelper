@@ -19,7 +19,7 @@ class LLMs:
             print("******Load Mistral Model Successfully******")
 
 
-    def get_response(self, message: str) -> str:
+    async def get_response(self, message: str) -> str:
         try:
             if self.model_name == "vistral":
                 conver = [{"role": "system", "content": 'Bạn là một chatbot về luật, cần trả lời rõ ràng dựa trên thông tư và các điều luật'},

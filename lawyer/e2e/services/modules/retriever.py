@@ -109,13 +109,13 @@ class Retriever:
         return tops_chunk, tops_idx
 
     async def retrieval(self, text):
-        embedding_query = encode(
+        embedding_query = await encode(
             tokenizer=self.tokenizer,
             model=self.model,
             text=text,
         )
 
-        scores_chunk, scores_document = aggregate_score(
+        scores_chunk, scores_document = await aggregate_score(
             embedding_query=embedding_query,
             embedding_corpus_full=self.embedding_corpus_full,
             count_chunk_docs=self.count_chunk_docs,

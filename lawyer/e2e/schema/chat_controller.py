@@ -44,16 +44,17 @@ class ChatController:
             current_history = history
 
         document = await self.retriever.retrieval(text)
-        document_search = web_search(text)
-        prompt = self.prompt.get_prompt_vi(query=text,
+        document_search = await web_search(text)
+        prompt = await self.prompt.get_prompt_vi(query=text,
                                            document=document,
                                            history=current_history,
                                            document_search=document_search)
-        response = self.llms.get_response(prompt)
+        print("Len: ",len(prompt.split()))
+        response = await self.llms.get_response(prompt)
         return f"{response}|||Relevant doc: {document}"
 
-    def retrieval_response(self, text: str):
-        document = self.retriever.retrieval(text)
+    async def retrieval_response(self, text: str):
+        document = await self.retriever.retrieval(text)
         return document
 
     def prompt_response(self, text: str):

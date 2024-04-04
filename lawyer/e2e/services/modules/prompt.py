@@ -22,7 +22,7 @@ class Prompt:
 
         return prompt
 
-    def get_prompt_vi(self, query: str, document: str, history: str, document_search: str):
+    async def get_prompt_vi(self, query: str, document: str, history: str, document_search: str):
         # current_history = ' '.join(self.history)
         prompt = f"""Nếu câu hỏi là chitchat, hãy trả lời ngay lập tức! Nếu không hãy trả lời trung thực và chính xác nhất có thể bằng cách sử dụng văn bản liên quan và lịch sử chat, nếu câu hỏi không nằm trong văn bản liên quan và lịch sử chat, hãy trả lời  "Bạn có thể cho tôi thêm thông tin về điều đó được không ?"
         ---
