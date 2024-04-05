@@ -20,6 +20,14 @@ const Chat = () => {
   const inputRef = useRef<HTMLInputElement | null>(null);
   const auth = useAuth();
   const [chatMessages, setChatMessages] = useState<Message[]>([]);
+
+  const handleNewMessage = () => {
+    const chatBlockElement = document.getElementById("chat-block");
+    if (chatBlockElement) {
+      chatBlockElement.scrollTop = chatBlockElement.scrollHeight;
+    }
+  };
+  
   const handleSubmit = async () => {
     const content = inputRef.current?.value as string;
     if (inputRef && inputRef.current) {
@@ -27,10 +35,44 @@ const Chat = () => {
     }
     const newMessage: Message = { role: "user", content };
     setChatMessages((prev) => [...prev, newMessage]);
-    const chatData = await sendChatRequest(content);
-    setChatMessages([...chatData.chats]);
-    //
+
+    try {
+      setChatMessages((prev) => [
+        ...prev,
+        { role: "assistant", content: "Thinking." }
+      ]);
+
+      const animationIntervalId = setInterval(() => {
+        setChatMessages((prev) => {
+          const updatedMessages = [...prev];
+          const lastMessage = updatedMessages[prev.length - 1];
+
+          if (lastMessage.content === "Thinking.") {
+            lastMessage.content = "Thinking...";
+          } else if (lastMessage.content === "Thinking...") {
+            lastMessage.content = "Thinking..";
+          } else {
+            lastMessage.content = "Thinking.";
+          }
+
+          return updatedMessages;
+        });
+      }, 700);
+
+      const chatData = await sendChatRequest(content);
+      setChatMessages([...chatData.chats]);
+
+      clearInterval(animationIntervalId);
+
+      setTimeout(() => {
+        handleNewMessage();
+      }, 0);
+    } catch (error) {
+      console.log(error);
+    }
+    
   };
+
   const handleDeleteChats = async () => {
     try {
       toast.loading("Deleting Chats", { id: "deletechats" });
@@ -69,8 +111,6 @@ const Chat = () => {
     const chatBlockElement = document.getElementById("chat-block");
     if (chatBlockElement) {
       chatBlockElement.scrollTop = chatBlockElement.scrollHeight;
-      console.log("chatBlockElement.scrollTop:",chatBlockElement.scrollTop)
-      console.log("chatBlockElement.scrollHeight:",chatBlockElement.scrollHeight)
     }
     const handleNewMessage = () => {
       if (chatBlockElement) {
@@ -124,11 +164,10 @@ const Chat = () => {
             {auth?.user?.name.split(" ")[1][0]}
           </Avatar>
           <Typography sx={{ mx: "auto", fontFamily: "work sans" }}>
-            You are talking to a ChatBOT
+            You are talking to a Legal Chatbot
           </Typography>
           <Typography sx={{ mx: "auto", fontFamily: "work sans", my: 4, p: 3 }}>
-            You can ask some questions related to Knowledge, Business, Advices,
-            Education, etc. But avoid sharing personal information
+            You can ask some questions related to Legal. However, please refrain from sharing personal information.
           </Typography>
           <Button
             onClick={handleDeleteChats}
@@ -166,7 +205,7 @@ const Chat = () => {
             fontWeight: "600",
           }}
         >
-          Model - Vistral model
+          Legal - Vistral Model
         </Typography>
         <Box
           id= "chat-block"
