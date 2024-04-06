@@ -1,6 +1,5 @@
 import { NextFunction, Request, Response } from "express";
 import User from "../models/User.js";
-import { ChatCompletionRequestMessage } from "openai";
 import { getResponse } from "../services/ai-service.js";
 export const generateChatCompletion = async (
   req: Request,
@@ -14,15 +13,16 @@ export const generateChatCompletion = async (
       return res
         .status(401)
         .json({ message: "User not registered OR Token malfunctioned" });
-    // grab chats of user
-    const chats = user.chats.map(({ role, content }) => ({
+    
+    const chats = user.chats.map(({ role, content, embedding }) => ({
       role,
       content,
-    })) as ChatCompletionRequestMessage[];
-    chats.push({ content: message, role: "user" });
-    user.chats.push({ content: message, role: "user" });
+      embedding,
+    }));
+
     const botResponse = await getResponse(chats, message);
-    user.chats.push({ content: botResponse, role: "assistant"});
+    user.chats.push({ content: message, role: "user" , embedding: botResponse.embedding_query});
+    user.chats.push({ content: botResponse.result, role: "assistant", embedding: null});
     await user.save();
     return res.status(200).json({ chats: user.chats });
   } catch (error) {
