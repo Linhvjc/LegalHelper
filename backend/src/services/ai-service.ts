@@ -7,8 +7,6 @@ export const getResponse = async (chats, message) => {
     try {
         const history = { content: JSON.stringify(chats.slice(-8)) };
         const res = await instance.post("/chatbot/e2e_response", { history, query: { content: message } });
-        // const data = await res.data;
-        // console.log("res.data: ",res.data)
         const data = await res.data;
         const embedding_query = data[0]
         const result = data[1]

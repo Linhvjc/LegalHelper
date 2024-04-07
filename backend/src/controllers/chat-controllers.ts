@@ -22,7 +22,7 @@ export const generateChatCompletion = async (
 
     const botResponse = await getResponse(chats, message);
     user.chats.push({ content: message, role: "user" , embedding: botResponse.embedding_query});
-    user.chats.push({ content: botResponse.result, role: "assistant", embedding: null});
+    user.chats.push({ content: botResponse.result, role: "assistant", embedding: []});
     await user.save();
     return res.status(200).json({ chats: user.chats });
   } catch (error) {

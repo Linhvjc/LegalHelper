@@ -15,7 +15,7 @@ const chatSchema = new mongoose.Schema({
   },
   embedding: {
     type: Array,
-    required: true
+    required: true,
   }
 });
 const userSchema = new mongoose.Schema({
