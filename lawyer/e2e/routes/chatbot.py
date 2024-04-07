@@ -42,7 +42,9 @@ async def create_prompt(item: Message):
 
 @router.post('/e2e_response')
 async def e2e(history: History, query: Message):
-    return await controller.e2e_response(history.content, query.content)
+    embedding_query, result = await controller.e2e_response(history.content, query.content)
+    # print(embedding_query)
+    return embedding_query.tolist()[0], result
 
 
 @router.post('/llm_test')

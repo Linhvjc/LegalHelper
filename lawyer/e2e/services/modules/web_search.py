@@ -8,7 +8,7 @@ import numpy as np
 from services.utils.bm25 import BM25Plus
 
 
-async def web_search(query, index=0, relevant_max_length=1024):
+async def web_search(query, index=0, relevant_max_length=512):
     fallback = 'Sorry, I cannot think of a reply for that.'
     result = ''
 

@@ -9,6 +9,7 @@ from pyvi import ViTokenizer
 from transformers import AutoModel
 from transformers import AutoTokenizer
 from typing import Optional
+import asyncio
 
 from ..utils.utils import aggregate_score
 from ..utils.utils import encode
@@ -27,6 +28,7 @@ class Retriever:
         # self.device = torch.device('cpu')
         self.tokenizer = AutoTokenizer.from_pretrained(model_path)
         self.model = AutoModel.from_pretrained(model_path).to(self.device)
+        self.sym_model = AutoModel.from_pretrained('linhphanff/phobert-large-distil-bge-m3')
         if database_path:
             self.embedding_corpus_full = np.load(
                 os.path.join(database_path, 'corpus.npy'),
@@ -108,11 +110,18 @@ class Retriever:
         tops_idx = [articles_id[idx] for idx in top5_best_doc]
         return tops_chunk, tops_idx
 
-    async def retrieval(self, text):
-        embedding_query = await encode(
-            tokenizer=self.tokenizer,
-            model=self.model,
-            text=text,
+    async def retrieval_asym(self, text):
+        embedding_query, embedding_store = await asyncio.gather(
+            encode(
+                tokenizer=self.tokenizer,
+                model=self.model,
+                text=text,
+            ),
+            encode(
+                tokenizer=self.tokenizer,
+                model=self.sym_model,
+                text=text,
+            )
         )
 
         scores_chunk, scores_document = await aggregate_score(
@@ -127,17 +136,17 @@ class Retriever:
         )[:5]
         top_best_document = [self.corpus[idx] for idx in top_5_best_doc_idx]
 
-        #! Get result by model
-        tops_chunk_model, tops_idx_model = await self._search_by_model(
-            top_best_document=top_best_document,
-            top_5_best_doc_idx=top_5_best_doc_idx,
-            embedding_query=embedding_query,
-        )
-
-        #! Get result by bm25
-        tops_chunk_bm25, tops_idx_bm25 = await self._search_by_bm25(
-            query=text,
-            top_best_document=top_best_document,
+        (tops_chunk_model, tops_idx_model), (tops_chunk_bm25, tops_idx_bm25) = await asyncio.gather(
+            self._search_by_model(
+                top_best_document=top_best_document,
+                top_5_best_doc_idx=top_5_best_doc_idx,
+                embedding_query=embedding_query,
+            ),
+            self._search_by_model(
+                top_best_document=top_best_document,
+                top_5_best_doc_idx=top_5_best_doc_idx,
+                embedding_query=embedding_query,
+            )
         )
 
         final_result = ''
@@ -175,7 +184,7 @@ class Retriever:
                 ).replace('_', ' ')
                 final_result += result_model
                 break
-        return final_result
+        return embedding_store, final_result
 
     def retrieval_tool(self, docs: list, query: str, output_length):
         embedding_query = encode(
