@@ -13,6 +13,10 @@ const chatSchema = new mongoose.Schema({
     type: String,
     required: true,
   },
+  embedding: {
+    type: Array,
+    required: true
+  }
 });
 const userSchema = new mongoose.Schema({
   name: {

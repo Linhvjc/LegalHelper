@@ -27,7 +27,7 @@ const Logo = () => {
           textShadow: "2px 2px 20px #000",
         }}
       >
-        <span style={{ fontSize: "20px" }}>Legal Intelligence</span>
+        <Link to={"/"} style={{ fontSize: "20px", color: "inherit", textDecoration: "none"}}>Legal Intelligence</Link>
       </Typography>
     </div>
   );
