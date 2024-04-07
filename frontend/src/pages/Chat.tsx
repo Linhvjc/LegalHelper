@@ -60,17 +60,35 @@ const Chat = () => {
       }, 700);
 
       const chatData = await sendChatRequest(content);
-      setChatMessages([...chatData.chats]);
-
       clearInterval(animationIntervalId);
+      const streamingMessage = chatData.chats[chatData.chats.length - 1].content; // Assuming chatData.chats is an array of messages
 
-      setTimeout(() => {
-        handleNewMessage();
-      }, 0);
+      const words = streamingMessage.split("|||")[0]
+      let wordIndex = 0;
+      
+      const streamingIntervalId = setInterval(() => {
+        setChatMessages((prevMessages) => {
+          const updatedMessages = prevMessages.map((message, index) => {
+            if (index === prevMessages.length - 1) {
+              const newContent = words.slice(0, wordIndex + 1);
+              return { ...message, content: newContent };
+            }
+            return message;
+          });
+
+          if (wordIndex < words.length - 1) {
+            wordIndex++;
+            handleNewMessage();
+          } else {
+            clearInterval(streamingIntervalId);
+          }
+
+          return updatedMessages;
+        });
+      }, 70);
     } catch (error) {
       console.log(error);
     }
-    
   };
 
   const handleDeleteChats = async () => {
