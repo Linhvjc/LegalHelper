@@ -39,6 +39,9 @@ class ChatController:
         )
         long_term_memory = await get_long_term_memory(embedding_query=embedding_query,
                                                     history=history)
+        if len(text.split()) <= 7:
+            document = ""
+            document_search = ""
         prompt = await self.prompt.get_prompt_vi(query=text,
                                                 document=document,
                                                 short_term_history=short_term_memory,

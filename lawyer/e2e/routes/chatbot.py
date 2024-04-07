@@ -51,5 +51,6 @@ async def e2e(history: History, query: Message):
 def llm_test(item: Message):
     return controller.llm_testing(item.content)
 
+
 if __name__ == '__main__':
     print('abc')
