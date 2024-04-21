@@ -13,9 +13,9 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+app.include_router(chatbot.router)
 app.include_router(prompt.router)
 app.include_router(parameter.router)
-app.include_router(chatbot.router)
 app.include_router(user.router)
 
 

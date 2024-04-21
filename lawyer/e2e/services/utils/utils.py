@@ -74,7 +74,7 @@ async def get_short_term_memory(history, history_max_length=256):
 async def get_long_term_memory(embedding_query, history, max_length=256):
     embedding_docs = []
     indexs = []
-    if len(history) == 0:
+    if len(history) == 0 or str(history) == 'string':
         return ""
     for i, item in enumerate(history):
         emb = item['embedding']

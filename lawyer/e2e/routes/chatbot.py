@@ -6,6 +6,7 @@ from models.history import History
 from config.database import PARAMETER_COLLECTION
 from schema.schemas import list_serial
 from schema.chat_controller import ChatController
+from services.modules.web_search import web_search
 
 router = APIRouter(prefix="/chatbot", tags=["Chatbot"])
 
@@ -35,9 +36,14 @@ async def get_docs(item: Message):
     return await controller.retrieval_response(item.content)
 
 
+@router.post('/web_search')
+async def get_web_search(item: Message):
+    return await web_search(item.content)
+
+
 @router.post('/prompting')
 async def create_prompt(item: Message):
-    return controller.prompt_response(item.content)
+    return await controller.prompt_response(item.content)
 
 
 @router.post('/e2e_response')
@@ -45,11 +51,12 @@ async def e2e(history: History, query: Message):
     embedding_query, result = await controller.e2e_response(history.content, query.content)
     # print(embedding_query)
     return embedding_query.tolist()[0], result
+    # return embedding_query[0], result
 
 
 @router.post('/llm_test')
-def llm_test(item: Message):
-    return controller.llm_testing(item.content)
+async def llm_test(item: Message):
+    return await controller.llm_testing(item.content)
 
 
 if __name__ == '__main__':

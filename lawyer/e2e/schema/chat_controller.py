@@ -55,23 +55,27 @@ class ChatController:
         print("Response time:", response_time, "seconds")
         
         return embedding_query, f"{response}|||Relevant doc: {document}"
+        # return [[]], f"{response}"
 
     async def retrieval_response(self, text: str):
         embedding_query, document = await self.retriever.retrieval_asym(text)
         return embedding_query, document
 
-    def prompt_response(self, text: str):
-        embedding_query, document = self.retriever.retrieval_asym(text)
-        prompt = self.prompt.get_prompt_vi(
+    async def prompt_response(self, text: str):
+        (embedding_query, document), document_search = await asyncio.gather(
+            self.retriever.retrieval_asym(text),
+            web_search(text)
+        )
+        prompt = await self.prompt.get_prompt_vi(
             query=text, 
             document=document, 
             short_term_history='',
             long_term_history='',
-            document_search='')
+            document_search=document_search)
         return prompt
 
-    def llm_testing(self, text: str):
-        return self.llms.get_response(text)
+    async def llm_testing(self, text: str):
+        return await self.llms.get_response(message=text, system="")
 
 
 if __name__ == '__main__':
